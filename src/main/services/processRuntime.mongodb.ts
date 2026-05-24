@@ -86,8 +86,11 @@ async function readListeningPid(platform: NodeJS.Platform, port: number): Promis
 export async function buildMonitoredMongoProcess(
   platform: NodeJS.Platform = process.platform
 ): Promise<ProcessSummary> {
-  const isRunning = await isLocalPortListening(MONGODB_LOCAL_PORT);
-  const pid = isRunning ? await readListeningPid(platform, MONGODB_LOCAL_PORT) : undefined;
+  const [isPortReachable, pid] = await Promise.all([
+    isLocalPortListening(MONGODB_LOCAL_PORT),
+    readListeningPid(platform, MONGODB_LOCAL_PORT)
+  ]);
+  const isRunning = isPortReachable || pid !== undefined;
 
   return {
     id: 'mongodb-local',

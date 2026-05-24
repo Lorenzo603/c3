@@ -6,14 +6,29 @@ import { EmptyState, ErrorState, LoadingState } from './components/ProcessListSt
 import { ProcessListTable } from './components/ProcessListTable';
 import { useProcessCollection } from './hooks/useProcessCollection';
 import { useProcessSelection } from './hooks/useProcessSelection';
-import { createProcessGateway, type ProcessGateway } from './services/processGateway';
+import {
+  createProcessGatewayWithOptions,
+  type ProcessGateway
+} from './services/processGateway';
 
 export interface ProcessListPageProps {
   gateway?: ProcessGateway;
 }
 
+function isFixtureModeEnabled(): boolean {
+  const mode = import.meta.env.VITE_C3_TEST_MODE;
+  return mode === '1' || mode === 'true';
+}
+
 export function ProcessListPage({ gateway }: ProcessListPageProps) {
-  const effectiveGateway = useMemo(() => gateway ?? createProcessGateway(), [gateway]);
+  const effectiveGateway = useMemo(
+    () =>
+      gateway ??
+      createProcessGatewayWithOptions(window.c3Desktop, {
+        allowFixtureFallback: isFixtureModeEnabled()
+      }),
+    [gateway]
+  );
   const { state, setSearch, setSource, setStatus, reload } = useProcessCollection(effectiveGateway);
   const { selectedProcessId, selectedProcess, selectProcess } = useProcessSelection(state.items);
 

@@ -7,6 +7,7 @@ import type {
 import {
   REQUIRED_DESKTOP_API_METHODS,
   createProcessGateway,
+  createProcessGatewayWithOptions,
   isDesktopApi
 } from './processGateway';
 
@@ -70,5 +71,20 @@ describe('process gateway contracts', () => {
     });
 
     expect(commandResponse.accepted).toBe(false);
+  });
+
+  it('does not fall back to fixtures when fallback is disabled', async () => {
+    const gateway = createProcessGatewayWithOptions(undefined, {
+      allowFixtureFallback: false
+    });
+
+    await expect(gateway.getProcessList()).rejects.toThrow(/Desktop API is unavailable/i);
+
+    await expect(
+      gateway.sendProcessCommand({ processId: 'x', action: 'stop' })
+    ).resolves.toMatchObject({
+      accepted: false,
+      message: expect.stringMatching(/Desktop API is unavailable/i)
+    });
   });
 });

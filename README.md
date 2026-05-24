@@ -57,7 +57,7 @@ This shape is UI-first by design so platform implementations can evolve later wi
 - Main process owns platform integration and IPC handlers.
 - Preload exposes a minimal safe API on window.c3Desktop.
 - Renderer consumes a ProcessGateway service abstraction.
-- ProcessGateway routes to preload API when available, otherwise fixture fallback for isolated UI work.
+- ProcessGateway routes to preload API in real mode and only uses fixture fallback in explicit test mode.
 
 ## Platform Abstraction Seam
 

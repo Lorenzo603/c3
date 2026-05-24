@@ -14,6 +14,10 @@ export interface ProcessGateway {
   sendProcessCommand(request: ProcessCommandRequest): Promise<ProcessCommandResponse>;
 }
 
+export interface ProcessGatewayOptions {
+  allowFixtureFallback?: boolean;
+}
+
 export const REQUIRED_DESKTOP_API_METHODS = ['getProcessList', 'sendProcessCommand'] as const;
 
 export function isDesktopApi(candidate: unknown): candidate is C3DesktopApi {
@@ -68,10 +72,35 @@ function createFixtureGateway(): ProcessGateway {
 }
 
 export function createProcessGateway(api: unknown = window.c3Desktop): ProcessGateway {
+  return createProcessGatewayWithOptions(api, {});
+}
+
+export function createProcessGatewayWithOptions(
+  api: unknown = window.c3Desktop,
+  options: ProcessGatewayOptions = {}
+): ProcessGateway {
+  const allowFixtureFallback = options.allowFixtureFallback ?? true;
+
   if (isDesktopApi(api)) {
     return {
       getProcessList: (request?: GetProcessListRequest) => api.getProcessList(request),
       sendProcessCommand: (request: ProcessCommandRequest) => api.sendProcessCommand(request)
+    };
+  }
+
+  if (!allowFixtureFallback) {
+    return {
+      async getProcessList(): Promise<GetProcessListResponse> {
+        throw new Error('Desktop API is unavailable in real mode.');
+      },
+      async sendProcessCommand(request: ProcessCommandRequest): Promise<ProcessCommandResponse> {
+        return {
+          processId: request.processId,
+          action: request.action,
+          accepted: false,
+          message: 'Desktop API is unavailable in real mode.'
+        };
+      }
     };
   }
 
