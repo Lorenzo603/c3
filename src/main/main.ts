@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   IPC_CHANNELS,
@@ -22,6 +23,17 @@ function resolveRuntimeMode() {
 
 const runtime = createProcessRuntime({ mode: resolveRuntimeMode() });
 
+function resolvePreloadPath(): string {
+  const defaultPath = join(__dirname, '../preload/index.mjs');
+  const candidates = [
+    defaultPath,
+    join(__dirname, '../preload/index.js'),
+    join(__dirname, '../preload/index.cjs')
+  ];
+
+  return candidates.find((candidate) => existsSync(candidate)) ?? defaultPath;
+}
+
 async function createMainWindow(): Promise<void> {
   mainWindow = new BrowserWindow({
     width: 1320,
@@ -30,7 +42,7 @@ async function createMainWindow(): Promise<void> {
     minHeight: 640,
     title: 'C3 Desktop',
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: resolvePreloadPath(),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false
