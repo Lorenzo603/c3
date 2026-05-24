@@ -1,0 +1,253 @@
+.process-page {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 0.75rem;
+  min-height: 100%;
+}
+
+.filter-bar {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-panel);
+}
+
+.filter-group {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.filter-group input,
+.filter-group select {
+  width: 100%;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.5rem;
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  padding: 0.55rem 0.65rem;
+}
+
+.process-content {
+  min-height: 0;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+}
+
+.process-list-surface,
+.process-detail-surface {
+  min-height: 0;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-panel);
+}
+
+.process-table-wrapper {
+  height: 100%;
+  overflow: auto;
+}
+
+.process-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.process-table th {
+  position: sticky;
+  top: 0;
+  background: #f0f6f2;
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding: 0.7rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.process-table td {
+  padding: 0.75rem 0.7rem;
+  border-bottom: 1px solid #edf2ee;
+  font-size: 0.92rem;
+  vertical-align: middle;
+}
+
+.process-row {
+  cursor: pointer;
+}
+
+.process-row:hover {
+  background: #f7fbf8;
+}
+
+.process-row.selected {
+  background: var(--brand-soft);
+}
+
+.process-name-cell {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.process-name-cell small {
+  color: var(--text-muted);
+}
+
+.status-badge,
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.status-running {
+  background: #e1f5eb;
+  color: var(--status-running);
+}
+
+.status-stopped {
+  background: #ecf0ee;
+  color: var(--status-stopped);
+}
+
+.status-degraded {
+  background: #fff2d7;
+  color: var(--status-degraded);
+}
+
+.status-starting {
+  background: #ddf1f8;
+  color: var(--status-starting);
+}
+
+.status-stopping {
+  background: #f9e4e8;
+  color: var(--status-stopping);
+}
+
+.status-unknown {
+  background: #e9ebf8;
+  color: var(--status-unknown);
+}
+
+.source-native {
+  background: #ddede3;
+  color: #27573c;
+}
+
+.source-docker {
+  background: #e2eefc;
+  color: #2c5d8f;
+}
+
+.source-database {
+  background: #f8ecd6;
+  color: #7c5b1d;
+}
+
+.source-custom {
+  background: #ebe4f6;
+  color: #5c3d8f;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.action-button {
+  border: 1px solid var(--border-soft);
+  background: #f9fbfa;
+  border-radius: 0.4rem;
+  padding: 0.24rem 0.55rem;
+  font-size: 0.75rem;
+}
+
+.action-button:disabled {
+  color: var(--text-muted);
+}
+
+.list-state {
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.list-state button {
+  margin-top: 0.6rem;
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: #fff;
+  border-radius: 0.4rem;
+  padding: 0.35rem 0.75rem;
+}
+
+.detail-panel {
+  padding: 1rem;
+  height: 100%;
+  overflow: auto;
+}
+
+.detail-panel h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.75rem;
+}
+
+.detail-panel dl {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 0.4rem 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.detail-panel dt {
+  color: var(--text-muted);
+}
+
+.detail-panel dd {
+  margin: 0;
+}
+
+.detail-note {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-soft);
+  padding-top: 0.75rem;
+}
+
+@media (max-width: 1100px) {
+  .process-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(320px, 1fr) auto;
+  }
+
+  .process-detail-surface {
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    padding: 0.7rem;
+  }
+
+  .filter-bar {
+    grid-template-columns: 1fr;
+  }
+}

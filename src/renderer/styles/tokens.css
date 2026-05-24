@@ -1,0 +1,20 @@
+:root {
+  --font-sans: 'IBM Plex Sans', 'Avenir Next', 'Segoe UI', sans-serif;
+  --bg-canvas: #edf3ef;
+  --bg-panel: #ffffff;
+  --bg-subtle: #f4f9f6;
+  --text-primary: #102019;
+  --text-secondary: #3d5247;
+  --text-muted: #6a7f74;
+  --border-soft: #d3dfd7;
+  --brand: #1f6c47;
+  --brand-soft: #e2f2e8;
+  --status-running: #1b8f5a;
+  --status-stopped: #626f68;
+  --status-degraded: #bb7a00;
+  --status-starting: #277f95;
+  --status-stopping: #8f4e57;
+  --status-unknown: #545c72;
+  --danger: #b53e3e;
+  --shadow-panel: 0 8px 24px rgba(16, 32, 25, 0.08);
+}
