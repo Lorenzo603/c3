@@ -19,10 +19,12 @@ This milestone intentionally focuses on shell architecture, typed contracts, and
 
 - src/main/main.ts: Electron bootstrap, BrowserWindow lifecycle, IPC handler registration.
 - src/main/services/processRuntime.ts: Runtime interface and platform selection seam.
-- src/main/services/processRuntime.macos.ts: macOS runtime stub endpoint.
-- src/main/services/processRuntime.windows.ts: Windows runtime stub endpoint.
-- src/main/services/processRuntime.stub.ts: Shared stub behavior for current milestone.
+- src/main/services/processRuntime.macos.ts: macOS runtime selector for real/test mode.
+- src/main/services/processRuntime.windows.ts: Windows runtime selector for real/test mode.
+- src/main/services/processRuntime.real.ts: Real environment runtime data providers.
+- src/main/services/processRuntime.stub.ts: Fixture-only runtime for test mode.
 - src/main/services/processRuntime.fixtures.ts: Mock process dataset + server-side filtering.
+- src/main/services/processRuntime.mongodb.ts: Live MongoDB local monitor (port 27017 + PID lookup).
 - src/preload/index.ts: Typed contextBridge API exposed to renderer.
 - src/shared/process.ts: Domain model + IPC request/response contracts.
 - src/renderer/main.tsx: Renderer bootstrap.
@@ -63,24 +65,32 @@ src/main/services/processRuntime.ts selects runtime implementation by process.pl
 
 - darwin -> processRuntime.macos.ts
 - win32 -> processRuntime.windows.ts
-- default -> processRuntime.stub.ts
+- default -> processRuntime.real.ts (or processRuntime.stub.ts in test mode)
 
-All current implementations are stubs backed by fixtures. Real monitoring/control can be introduced behind the same ProcessRuntime interface.
+Runtime mode is selected at startup:
+
+- real mode (default): returns live environment data (currently MongoDB Local on port 27017).
+- test mode: returns fixture data only.
+
+Enable test mode with either C3_TEST_MODE=1 or the --test-mode runtime flag.
 
 ## Scripts
 
 - npm run dev: Start Electron + Vite dev workflow.
+- npm run dev:test: Start Electron + Vite with fixture-only runtime mode.
 - npm run typecheck: TypeScript project-reference checks.
 - npm run test: Run Vitest suite.
 - npm run build: Build main, preload, and renderer bundles.
 - npm run package:smoke: Build + electron-builder unpacked app output.
 - npm run preview: Preview built Electron app.
+- npm run preview:test: Preview build with fixture-only runtime mode.
 
 ## Local Setup
 
 1. Install dependencies.
 2. Run npm run dev.
 3. If Electron binary is missing on first run, execute npx electron --version once and retry npm run dev.
+4. For fixture-only mode, run npm run dev:test.
 
 ## Verification Status (Current)
 

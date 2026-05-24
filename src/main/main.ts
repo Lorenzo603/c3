@@ -8,7 +8,19 @@ import {
 import { createProcessRuntime } from './services/processRuntime';
 
 let mainWindow: BrowserWindow | null = null;
-const runtime = createProcessRuntime();
+
+function resolveRuntimeMode() {
+  const hasTestFlag = process.argv.includes('--test-mode');
+  const envMode = process.env.C3_TEST_MODE;
+
+  if (hasTestFlag || envMode === '1' || envMode === 'true') {
+    return 'test' as const;
+  }
+
+  return 'real' as const;
+}
+
+const runtime = createProcessRuntime({ mode: resolveRuntimeMode() });
 
 async function createMainWindow(): Promise<void> {
   mainWindow = new BrowserWindow({

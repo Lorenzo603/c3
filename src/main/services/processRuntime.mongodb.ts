@@ -7,6 +7,7 @@ const execFileAsync = promisify(execFile);
 
 const MONGODB_LOCAL_PORT = 27017;
 const MONITORING_TIMEOUT_MS = 500;
+const LOOPBACK_HOSTS = ['127.0.0.1', '::1'];
 
 function monitoredActionCapability() {
   return {
@@ -17,8 +18,8 @@ function monitoredActionCapability() {
 }
 
 async function isLocalPortListening(port: number): Promise<boolean> {
-  return new Promise((resolve) => {
-    const socket = createConnection({ host: '127.0.0.1', port });
+  const checks = LOOPBACK_HOSTS.map((host) => new Promise<boolean>((resolve) => {
+    const socket = createConnection({ host, port });
 
     const finish = (isListening: boolean) => {
       socket.removeAllListeners();
@@ -30,7 +31,10 @@ async function isLocalPortListening(port: number): Promise<boolean> {
     socket.once('connect', () => finish(true));
     socket.once('timeout', () => finish(false));
     socket.once('error', () => finish(false));
-  });
+  }));
+
+  const results = await Promise.all(checks);
+  return results.some(Boolean);
 }
 
 function parsePid(value: string): number | undefined {

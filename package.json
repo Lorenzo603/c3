@@ -7,8 +7,10 @@
   "main": "out/main/main.js",
   "scripts": {
     "dev": "electron-vite dev",
+    "dev:test": "C3_TEST_MODE=1 electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
+    "preview:test": "C3_TEST_MODE=1 electron-vite preview",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
