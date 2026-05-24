@@ -72,6 +72,34 @@ export const processFixtures: ProcessSummary[] = [
     }
   },
   {
+    id: 'mongodb-local',
+    name: 'MongoDB Local',
+    source: 'database',
+    status: 'stopped',
+    health: 'critical',
+    ports: [27017],
+    description: 'Targeted local MongoDB monitor on localhost:27017',
+    uptimeSeconds: undefined,
+    lastUpdatedIso: now,
+    actions: {
+      start: {
+        supported: false,
+        enabled: false,
+        reason: 'MongoDB monitoring is read-only in this milestone'
+      },
+      stop: {
+        supported: false,
+        enabled: false,
+        reason: 'MongoDB monitoring is read-only in this milestone'
+      },
+      restart: {
+        supported: false,
+        enabled: false,
+        reason: 'MongoDB monitoring is read-only in this milestone'
+      }
+    }
+  },
+  {
     id: 'scheduler',
     name: 'Job Scheduler',
     source: 'native',

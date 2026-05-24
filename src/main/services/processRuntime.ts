@@ -22,5 +22,5 @@ export function createProcessRuntime(platform: NodeJS.Platform = process.platfor
     return createWindowsProcessRuntime();
   }
 
-  return createStubProcessRuntime(platform);
+  return createStubProcessRuntime(platform, platform);
 }
