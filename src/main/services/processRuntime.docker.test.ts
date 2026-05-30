@@ -10,7 +10,7 @@ interface DockerPsEntry {
 }
 
 function findProcessById(
-  items: Awaited<ReturnType<(typeof import('./processRuntime.docker'))['buildMonitoredDockerDatabaseProcesses']>>,
+  items: Awaited<ReturnType<(typeof import('./processRuntime.docker'))['buildMonitoredDockerProcesses']>>,
   id: string
 ) {
   const item = items.find((candidate) => candidate.id === id);
@@ -96,9 +96,9 @@ describe('docker process monitoring', () => {
       }
     ]);
 
-    const { buildMonitoredDockerDatabaseProcesses } = await importDockerRuntime();
+    const { buildMonitoredDockerProcesses } = await importDockerRuntime();
 
-    const items = await buildMonitoredDockerDatabaseProcesses();
+    const items = await buildMonitoredDockerProcesses();
     const postgres = findProcessById(items, 'docker-postgres');
     const redis = findProcessById(items, 'docker-redis');
 
@@ -128,9 +128,9 @@ describe('docker process monitoring', () => {
       }
     ]);
 
-    const { buildMonitoredDockerDatabaseProcesses } = await importDockerRuntime();
+    const { buildMonitoredDockerProcesses } = await importDockerRuntime();
 
-    const items = await buildMonitoredDockerDatabaseProcesses();
+    const items = await buildMonitoredDockerProcesses();
     const postgres = findProcessById(items, 'docker-postgres');
     const redis = findProcessById(items, 'docker-redis');
 
@@ -147,9 +147,9 @@ describe('docker process monitoring', () => {
   it('reports Colima not started when Docker runtime is unavailable', async () => {
     mockDockerUnavailable();
 
-    const { buildMonitoredDockerDatabaseProcesses } = await importDockerRuntime();
+    const { buildMonitoredDockerProcesses } = await importDockerRuntime();
 
-    const items = await buildMonitoredDockerDatabaseProcesses();
+    const items = await buildMonitoredDockerProcesses();
     const postgres = findProcessById(items, 'docker-postgres');
     const redis = findProcessById(items, 'docker-redis');
 

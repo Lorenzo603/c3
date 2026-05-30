@@ -109,7 +109,7 @@ function buildDockerProcessSummary(
   };
 }
 
-export async function buildMonitoredDockerDatabaseProcesses(): Promise<ProcessSummary[]> {
+export async function buildMonitoredDockerProcesses(): Promise<ProcessSummary[]> {
   const runtimeState = await readDockerRuntimeState();
 
   const postgres = buildDockerProcessSummary(runtimeState, {

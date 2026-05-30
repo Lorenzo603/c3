@@ -11,7 +11,7 @@ import {
   COLIMA_PROCESS_ID,
   runColimaAction
 } from './processRuntime.colima';
-import { buildMonitoredDockerDatabaseProcesses } from './processRuntime.docker';
+import { buildMonitoredDockerProcesses } from './processRuntime.docker';
 import { filterProcesses } from './processRuntime.fixtures';
 import {
   buildMonitoredMongoProcess,
@@ -26,7 +26,7 @@ async function buildRealProcessList(platform: NodeJS.Platform): Promise<ProcessS
   const [mongoProcess, mySqlProcess, dockerDatabaseProcesses] = await Promise.all([
     buildMonitoredMongoProcess(platform),
     buildMonitoredMySqlProcess(platform),
-    buildMonitoredDockerDatabaseProcesses()
+    buildMonitoredDockerProcesses()
   ]);
 
   const baseProcesses = [mongoProcess, mySqlProcess, ...dockerDatabaseProcesses];
