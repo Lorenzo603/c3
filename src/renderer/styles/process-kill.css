@@ -1,0 +1,135 @@
+.process-kill-page {
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+}
+
+.process-kill-surface {
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-panel);
+  padding: 1rem;
+}
+
+.process-kill-surface h2,
+.process-kill-surface h3 {
+  margin: 0;
+}
+
+.process-kill-subtitle {
+  margin-top: 0.45rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.process-kill-form {
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.process-kill-form label {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.process-kill-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.process-kill-row input {
+  flex: 1;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.5rem;
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  padding: 0.55rem 0.65rem;
+}
+
+.process-kill-row button,
+.process-kill-details-header button {
+  border: 1px solid var(--border-soft);
+  border-radius: 0.5rem;
+  background: var(--brand);
+  color: #fff;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.process-kill-row button:disabled,
+.process-kill-details-header button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.process-kill-message {
+  margin-top: 0.7rem;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+
+.process-kill-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.process-kill-details {
+  margin: 0.9rem 0 0;
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 0.45rem 0.6rem;
+}
+
+.process-kill-details dt {
+  color: var(--text-muted);
+}
+
+.process-kill-details dd {
+  margin: 0;
+}
+
+.process-kill-command {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+.process-kill-action {
+  margin-top: 0.9rem;
+  border-radius: 0.45rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.85rem;
+}
+
+.process-kill-action.accepted {
+  background: #e2f3ea;
+  color: #1e6944;
+}
+
+.process-kill-action.failed {
+  background: #fdeeee;
+  color: #9c3030;
+}
+
+@media (max-width: 760px) {
+  .process-kill-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .process-kill-details-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .process-kill-details {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ProcessListPage } from '../features/process-list/ProcessListPage';
+import { ProcessKillPage } from '../features/process-kill/ProcessKillPage';
 
 type AppPageId = 'process-monitoring' | 'process-kill';
 
@@ -70,7 +71,7 @@ export function App() {
           {activePage.id === 'process-monitoring' ? (
             <ProcessListPage />
           ) : (
-            <section className="app-empty-page" aria-label="Process Kill page" />
+            <ProcessKillPage />
           )}
         </main>
       </div>

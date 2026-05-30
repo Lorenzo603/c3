@@ -45,7 +45,17 @@ describe('process gateway contracts', () => {
 
     const api: C3DesktopApi = {
       getProcessList: vi.fn().mockResolvedValue(processListResponse),
-      sendProcessCommand: vi.fn().mockResolvedValue(commandResponse)
+      sendProcessCommand: vi.fn().mockResolvedValue(commandResponse),
+      findProcessByPort: vi.fn().mockResolvedValue({
+        port: 3000,
+        found: false,
+        message: 'not found'
+      }),
+      killProcess: vi.fn().mockResolvedValue({
+        pid: 1,
+        accepted: false,
+        message: 'not enabled'
+      })
     };
 
     const gateway = createProcessGateway(api);

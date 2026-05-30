@@ -1,6 +1,8 @@
 export const IPC_CHANNELS = {
   getProcessList: 'c3:get-process-list',
-  processCommand: 'c3:process-command'
+  processCommand: 'c3:process-command',
+  findProcessByPort: 'c3:find-process-by-port',
+  killProcess: 'c3:kill-process'
 } as const;
 
 export type ProcessStatus =
@@ -72,7 +74,41 @@ export interface ProcessCommandResponse {
   output?: string;
 }
 
+export interface FindProcessByPortRequest {
+  port: number;
+}
+
+export interface PortProcessDetails {
+  pid: number;
+  name: string;
+  command: string;
+  user?: string;
+  address?: string;
+}
+
+export interface FindProcessByPortResponse {
+  port: number;
+  found: boolean;
+  message: string;
+  process?: PortProcessDetails;
+  command?: string;
+  output?: string;
+}
+
+export interface KillProcessRequest {
+  pid: number;
+}
+
+export interface KillProcessResponse {
+  pid: number;
+  accepted: boolean;
+  message: string;
+  command?: string;
+}
+
 export interface C3DesktopApi {
   getProcessList(request?: GetProcessListRequest): Promise<GetProcessListResponse>;
   sendProcessCommand(request: ProcessCommandRequest): Promise<ProcessCommandResponse>;
+  findProcessByPort(request: FindProcessByPortRequest): Promise<FindProcessByPortResponse>;
+  killProcess(request: KillProcessRequest): Promise<KillProcessResponse>;
 }

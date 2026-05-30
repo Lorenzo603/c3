@@ -2,7 +2,9 @@ import { contextBridge, ipcRenderer } from 'electron';
 import {
   IPC_CHANNELS,
   type C3DesktopApi,
+  type FindProcessByPortRequest,
   type GetProcessListRequest,
+  type KillProcessRequest,
   type ProcessCommandRequest
 } from '../shared/process';
 
@@ -12,6 +14,12 @@ const api: C3DesktopApi = {
   },
   sendProcessCommand(request: ProcessCommandRequest) {
     return ipcRenderer.invoke(IPC_CHANNELS.processCommand, request);
+  },
+  findProcessByPort(request: FindProcessByPortRequest) {
+    return ipcRenderer.invoke(IPC_CHANNELS.findProcessByPort, request);
+  },
+  killProcess(request: KillProcessRequest) {
+    return ipcRenderer.invoke(IPC_CHANNELS.killProcess, request);
   }
 };
 

@@ -3,10 +3,16 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   IPC_CHANNELS,
+  type FindProcessByPortRequest,
   type GetProcessListRequest,
+  type KillProcessRequest,
   type ProcessCommandRequest
 } from '../shared/process';
 import { createProcessRuntime } from './services/processRuntime';
+import {
+  findProcessByPort,
+  killProcessByPid
+} from './services/processPortControl';
 import { stopManagedCloudSqlProxyConnectionsProcess } from './services/processRuntime.script';
 
 let mainWindow: BrowserWindow | null = null;
@@ -94,6 +100,16 @@ function registerIpcHandlers(): void {
   ipcMain.handle(
     IPC_CHANNELS.processCommand,
     async (_event, request: ProcessCommandRequest) => runtime.sendCommand(request)
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.findProcessByPort,
+    async (_event, request: FindProcessByPortRequest) => findProcessByPort(request)
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.killProcess,
+    async (_event, request: KillProcessRequest) => killProcessByPid(request)
   );
 }
 
