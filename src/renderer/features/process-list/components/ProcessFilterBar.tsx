@@ -41,6 +41,7 @@ export function ProcessFilterBar({
           <option value="docker">Docker</option>
           <option value="database">Database</option>
           <option value="custom">Custom</option>
+          <option value="scripts">Scripts</option>
         </select>
       </label>
 

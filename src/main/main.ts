@@ -7,8 +7,31 @@ import {
   type ProcessCommandRequest
 } from '../shared/process';
 import { createProcessRuntime } from './services/processRuntime';
+import { stopManagedCloudSqlProxyConnectionsProcess } from './services/processRuntime.script';
 
 let mainWindow: BrowserWindow | null = null;
+let hasShutdownCleanupRun = false;
+
+function runShutdownCleanup(): void {
+  if (hasShutdownCleanupRun) {
+    return;
+  }
+
+  hasShutdownCleanupRun = true;
+
+  const stopResult = stopManagedCloudSqlProxyConnectionsProcess();
+  if (!stopResult.accepted) {
+    return;
+  }
+
+  if (stopResult.command) {
+    console.info(`[shutdown] ${stopResult.command}`);
+  }
+
+  if (stopResult.output) {
+    console.info(`[shutdown] ${stopResult.output}`);
+  }
+}
 
 function resolveRuntimeMode() {
   const hasTestFlag = process.argv.includes('--test-mode');
@@ -86,7 +109,13 @@ app.whenReady().then(async () => {
 });
 
 app.on('window-all-closed', () => {
+  runShutdownCleanup();
+
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('before-quit', () => {
+  runShutdownCleanup();
 });

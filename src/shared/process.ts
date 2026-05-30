@@ -11,7 +11,7 @@ export type ProcessStatus =
   | 'degraded'
   | 'unknown';
 
-export type ProcessSource = 'native' | 'docker' | 'database' | 'custom';
+export type ProcessSource = 'native' | 'docker' | 'database' | 'custom' | 'scripts';
 
 export type ProcessHealth = 'healthy' | 'warning' | 'critical' | 'unknown';
 

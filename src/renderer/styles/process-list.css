@@ -183,6 +183,11 @@
   color: #5c3d8f;
 }
 
+.source-scripts {
+  background: #e6f4ee;
+  color: #1f6a4b;
+}
+
 .row-actions {
   display: flex;
   flex-wrap: wrap;

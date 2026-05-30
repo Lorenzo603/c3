@@ -21,19 +21,25 @@ import {
   buildMonitoredMongoProcess,
   buildMonitoredMySqlProcess
 } from './processRuntime.mongodb';
+import {
+  buildMonitoredCloudSqlProxyConnectionsProcess,
+  CLOUD_SQL_PROXY_PROCESS_ID,
+  runCloudSqlProxyConnectionsAction
+} from './processRuntime.script';
 
 function buildReadOnlyMessage(): string {
   return 'Process control is disabled in real monitoring mode for this milestone.';
 }
 
 async function buildRealProcessList(platform: NodeJS.Platform): Promise<ProcessSummary[]> {
-  const [mongoProcess, mySqlProcess, dockerDatabaseProcesses] = await Promise.all([
+  const [mongoProcess, mySqlProcess, dockerDatabaseProcesses, cloudSqlProxyScriptProcess] = await Promise.all([
     buildMonitoredMongoProcess(platform),
     buildMonitoredMySqlProcess(platform),
-    buildMonitoredDockerProcesses()
+    buildMonitoredDockerProcesses(),
+    buildMonitoredCloudSqlProxyConnectionsProcess(platform)
   ]);
 
-  const baseProcesses = [mongoProcess, mySqlProcess, ...dockerDatabaseProcesses];
+  const baseProcesses = [cloudSqlProxyScriptProcess, mongoProcess, mySqlProcess, ...dockerDatabaseProcesses];
 
   if (platform !== 'darwin') {
     return baseProcesses;
@@ -65,6 +71,19 @@ export function createRealProcessRuntime(platform: NodeJS.Platform = process.pla
           message: colimaResult.message,
           command: colimaResult.command,
           output: colimaResult.output
+        };
+      }
+
+      if (request.processId === CLOUD_SQL_PROXY_PROCESS_ID) {
+        const scriptResult = await runCloudSqlProxyConnectionsAction(request.action, platform);
+
+        return {
+          processId: request.processId,
+          action: request.action,
+          accepted: scriptResult.accepted,
+          message: scriptResult.message,
+          command: scriptResult.command,
+          output: scriptResult.output
         };
       }
 
