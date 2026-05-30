@@ -11,7 +11,11 @@ import {
   COLIMA_PROCESS_ID,
   runColimaAction
 } from './processRuntime.colima';
-import { buildMonitoredDockerProcesses } from './processRuntime.docker';
+import {
+  buildMonitoredDockerProcesses,
+  isDockerProcessId,
+  runDockerProcessAction
+} from './processRuntime.docker';
 import { filterProcesses } from './processRuntime.fixtures';
 import {
   buildMonitoredMongoProcess,
@@ -61,6 +65,19 @@ export function createRealProcessRuntime(platform: NodeJS.Platform = process.pla
           message: colimaResult.message,
           command: colimaResult.command,
           output: colimaResult.output
+        };
+      }
+
+      if (isDockerProcessId(request.processId)) {
+        const dockerResult = await runDockerProcessAction(request.processId, request.action);
+
+        return {
+          processId: request.processId,
+          action: request.action,
+          accepted: dockerResult.accepted,
+          message: dockerResult.message,
+          command: dockerResult.command,
+          output: dockerResult.output
         };
       }
 

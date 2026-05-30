@@ -1,19 +1,46 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import type { ProcessSummary } from '../../shared/process';
+import type { ProcessAction, ProcessSummary } from '../../shared/process';
 
 const execFileAsync = promisify(execFile);
 
 const POSTGRES_DOCKER_PORT = 5432;
 const REDIS_DOCKER_PORT = 6379;
 const COLIMA_NOT_STARTED_MESSAGE = 'Colima not started';
-const READ_ONLY_REASON = 'Container monitoring is read-only in this milestone.';
+const DOCKER_UNAVAILABLE_REASON = 'Colima not started';
+
+export const DOCKER_POSTGRES_PROCESS_ID = 'docker-postgres';
+export const DOCKER_REDIS_PROCESS_ID = 'docker-redis';
+
+interface DockerProcessConfig {
+  id: typeof DOCKER_POSTGRES_PROCESS_ID | typeof DOCKER_REDIS_PROCESS_ID;
+  name: string;
+  port: number;
+  matchHints: string[];
+}
+
+const DOCKER_PROCESS_CONFIGS: DockerProcessConfig[] = [
+  {
+    id: DOCKER_POSTGRES_PROCESS_ID,
+    name: 'PostgreSQL (Docker)',
+    port: POSTGRES_DOCKER_PORT,
+    matchHints: ['postgres', 'postgis']
+  },
+  {
+    id: DOCKER_REDIS_PROCESS_ID,
+    name: 'Redis (Docker)',
+    port: REDIS_DOCKER_PORT,
+    matchHints: ['redis']
+  }
+];
 
 interface DockerContainerSummary {
   id: string;
   name: string;
   image: string;
   ports: string;
+  status: string;
+  running: boolean;
 }
 
 interface DockerRuntimeState {
@@ -21,28 +48,75 @@ interface DockerRuntimeState {
   containers: DockerContainerSummary[];
 }
 
-function monitoredActionCapability() {
+interface DockerCommandResult {
+  accepted: boolean;
+  message: string;
+  command?: string;
+  output?: string;
+}
+
+function unsupportedActionCapability(reason: string) {
   return {
     supported: false,
     enabled: false,
-    reason: READ_ONLY_REASON
+    reason
+  };
+}
+
+function enabledActionCapability(reason?: string) {
+  return {
+    supported: true,
+    enabled: true,
+    reason
+  };
+}
+
+function disabledActionCapability(reason: string) {
+  return {
+    supported: true,
+    enabled: false,
+    reason
+  };
+}
+
+function inferContainerRunning(status: string): boolean {
+  return /^up\b/i.test(status.trim());
+}
+
+function parseProcessEntry(
+  line: string
+): Partial<DockerContainerSummary> & {
+  ID?: string;
+  Names?: string;
+  Image?: string;
+  Ports?: string;
+  Status?: string;
+} {
+  return JSON.parse(line) as Partial<DockerContainerSummary> & {
+    ID?: string;
+    Names?: string;
+    Image?: string;
+    Ports?: string;
+    Status?: string;
   };
 }
 
 async function readDockerRuntimeState(): Promise<DockerRuntimeState> {
   try {
-    const { stdout } = await execFileAsync('docker', ['ps', '--format', '{{json .}}']);
+    const { stdout } = await execFileAsync('docker', ['ps', '-a', '--format', '{{json .}}']);
 
     const containers = stdout
       .split('\n')
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
-      .map((line) => JSON.parse(line) as Partial<DockerContainerSummary> & { ID?: string; Names?: string; Image?: string; Ports?: string })
+      .map((line) => parseProcessEntry(line))
       .map((entry) => ({
         id: entry.ID ?? '',
         name: entry.Names ?? '',
         image: entry.Image ?? '',
-        ports: entry.Ports ?? ''
+        ports: entry.Ports ?? '',
+        status: entry.Status ?? '',
+        running: inferContainerRunning(entry.Status ?? '')
       }));
 
     return {
@@ -59,16 +133,72 @@ async function readDockerRuntimeState(): Promise<DockerRuntimeState> {
 
 function findContainerByPort(containers: DockerContainerSummary[], port: number): DockerContainerSummary | undefined {
   const targetToken = `:${port}->`;
-  return containers.find((container) => container.ports.includes(targetToken));
+  const barePortToken = `${port}/tcp`;
+
+  return containers.find((container) => {
+    const ports = container.ports.toLowerCase();
+    return ports.includes(targetToken) || ports.includes(barePortToken);
+  });
+}
+
+function findContainerByHints(
+  containers: DockerContainerSummary[],
+  hints: string[]
+): DockerContainerSummary | undefined {
+  return containers.find((container) => {
+    const name = container.name.toLowerCase();
+    const image = container.image.toLowerCase();
+
+    return hints.some((hint) => name.includes(hint) || image.includes(hint));
+  });
+}
+
+function findContainerForConfig(
+  containers: DockerContainerSummary[],
+  config: DockerProcessConfig
+): DockerContainerSummary | undefined {
+  return (
+    findContainerByPort(containers, config.port) ??
+    findContainerByHints(containers, config.matchHints)
+  );
+}
+
+function findProcessConfigById(processId: string): DockerProcessConfig | undefined {
+  return DOCKER_PROCESS_CONFIGS.find((config) => config.id === processId);
+}
+
+function isSupportedDockerAction(action: ProcessAction): action is 'start' | 'stop' {
+  return action === 'start' || action === 'stop';
+}
+
+function buildDockerOutput(stdout: string, stderr: string): string | undefined {
+  const output = `${stdout}\n${stderr}`.trim();
+  return output.length > 0 ? output : undefined;
+}
+
+async function runDockerCommand(args: string[]): Promise<{ command: string; output?: string }> {
+  const { stdout, stderr } = await execFileAsync('docker', args);
+
+  return {
+    command: `docker ${args.join(' ')}`,
+    output: buildDockerOutput(stdout, stderr)
+  };
+}
+
+function errorOutput(error: unknown): string {
+  if (!error || typeof error !== 'object') {
+    return '';
+  }
+
+  const stdout = 'stdout' in error && typeof error.stdout === 'string' ? error.stdout : '';
+  const stderr = 'stderr' in error && typeof error.stderr === 'string' ? error.stderr : '';
+
+  return `${stdout}\n${stderr}`.trim();
 }
 
 function buildDockerProcessSummary(
   runtimeState: DockerRuntimeState,
-  config: {
-    id: string;
-    name: string;
-    port: number;
-  }
+  config: DockerProcessConfig
 ): ProcessSummary {
   if (!runtimeState.available) {
     return {
@@ -81,30 +211,42 @@ function buildDockerProcessSummary(
       description: COLIMA_NOT_STARTED_MESSAGE,
       lastUpdatedIso: new Date().toISOString(),
       actions: {
-        start: monitoredActionCapability(),
-        stop: monitoredActionCapability(),
-        restart: monitoredActionCapability()
+        start: unsupportedActionCapability(DOCKER_UNAVAILABLE_REASON),
+        stop: unsupportedActionCapability(DOCKER_UNAVAILABLE_REASON),
+        restart: unsupportedActionCapability('Restart is not enabled for Docker monitors.')
       }
     };
   }
 
-  const container = findContainerByPort(runtimeState.containers, config.port);
+  const container = findContainerForConfig(runtimeState.containers, config);
+  const hasContainer = container !== undefined;
+  const isRunning = container?.running ?? false;
 
   return {
     id: config.id,
     name: config.name,
     source: 'docker',
-    status: container ? 'running' : 'stopped',
-    health: container ? 'healthy' : 'critical',
+    status: isRunning ? 'running' : 'stopped',
+    health: hasContainer ? (isRunning ? 'healthy' : 'warning') : 'critical',
     ports: [config.port],
-    description: container
-      ? `Running in Docker container ${container.name} (${container.image}) on port ${config.port}`
+    description: hasContainer
+      ? isRunning
+        ? `Running in Docker container ${container.name} (${container.image}) on port ${config.port}`
+        : `Docker container ${container.name} is stopped on port ${config.port}`
       : `Watching Docker containers on port ${config.port}`,
     lastUpdatedIso: new Date().toISOString(),
     actions: {
-      start: monitoredActionCapability(),
-      stop: monitoredActionCapability(),
-      restart: monitoredActionCapability()
+      start: !hasContainer
+        ? unsupportedActionCapability(`No Docker container found exposing port ${config.port}.`)
+        : isRunning
+          ? disabledActionCapability('Container is already running.')
+          : enabledActionCapability('Start container'),
+      stop: !hasContainer
+        ? unsupportedActionCapability(`No Docker container found exposing port ${config.port}.`)
+        : isRunning
+          ? enabledActionCapability('Stop container')
+          : disabledActionCapability('Container is already stopped.'),
+      restart: unsupportedActionCapability('Restart is not enabled for Docker monitors.')
     }
   };
 }
@@ -112,17 +254,79 @@ function buildDockerProcessSummary(
 export async function buildMonitoredDockerProcesses(): Promise<ProcessSummary[]> {
   const runtimeState = await readDockerRuntimeState();
 
-  const postgres = buildDockerProcessSummary(runtimeState, {
-    id: 'docker-postgres',
-    name: 'PostgreSQL (Docker)',
-    port: POSTGRES_DOCKER_PORT
-  });
+  return DOCKER_PROCESS_CONFIGS.map((config) => buildDockerProcessSummary(runtimeState, config));
+}
 
-  const redis = buildDockerProcessSummary(runtimeState, {
-    id: 'docker-redis',
-    name: 'Redis (Docker)',
-    port: REDIS_DOCKER_PORT
-  });
+export function isDockerProcessId(processId: string): processId is typeof DOCKER_POSTGRES_PROCESS_ID | typeof DOCKER_REDIS_PROCESS_ID {
+  return processId === DOCKER_POSTGRES_PROCESS_ID || processId === DOCKER_REDIS_PROCESS_ID;
+}
 
-  return [postgres, redis];
+export async function runDockerProcessAction(processId: string, action: ProcessAction): Promise<DockerCommandResult> {
+  if (!isSupportedDockerAction(action)) {
+    return {
+      accepted: false,
+      message: 'Only start and stop are enabled for Docker monitors.'
+    };
+  }
+
+  const config = findProcessConfigById(processId);
+
+  if (!config) {
+    return {
+      accepted: false,
+      message: `Unknown Docker process id: ${processId}`
+    };
+  }
+
+  const runtimeState = await readDockerRuntimeState();
+
+  if (!runtimeState.available) {
+    return {
+      accepted: false,
+      message: COLIMA_NOT_STARTED_MESSAGE
+    };
+  }
+
+  const container = findContainerForConfig(runtimeState.containers, config);
+
+  if (!container) {
+    return {
+      accepted: false,
+      message: `No Docker container found exposing port ${config.port}.`
+    };
+  }
+
+  if (action === 'start' && container.running) {
+    return {
+      accepted: false,
+      message: `${config.name} container is already running.`
+    };
+  }
+
+  if (action === 'stop' && !container.running) {
+    return {
+      accepted: false,
+      message: `${config.name} container is already stopped.`
+    };
+  }
+
+  try {
+    const commandResult = await runDockerCommand([action, container.id]);
+    const successVerb = action === 'start' ? 'started' : 'stopped';
+
+    return {
+      accepted: true,
+      message: `${config.name} container ${successVerb} successfully.`,
+      command: commandResult.command,
+      output: commandResult.output
+    };
+  } catch (error) {
+    const details = errorOutput(error);
+
+    return {
+      accepted: false,
+      message: details || `Failed to ${action} Docker container for ${config.name}.`,
+      output: details || undefined
+    };
+  }
 }
