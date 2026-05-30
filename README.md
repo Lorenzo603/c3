@@ -84,6 +84,22 @@ Enable test mode with either C3_TEST_MODE=1 or the --test-mode runtime flag.
 - npm run package:smoke: Build + electron-builder unpacked app output.
 - npm run preview: Preview built Electron app.
 - npm run preview:test: Preview build with fixture-only runtime mode.
+- npm run package:mac:app: Build and package an unpacked macOS app bundle (.app).
+- npm run package:mac:dmg: Build and package a macOS DMG installer.
+- npm run package:mac:prod: Build and package both .app and .dmg artifacts.
+
+## macOS Production Packaging
+
+For production packaging on macOS, use one of:
+
+- npm run package:mac:app
+- npm run package:mac:dmg
+- npm run package:mac:prod
+
+Artifacts are written to the release directory, including:
+
+- release/mac-arm64/C3.app (runnable app bundle on Apple Silicon)
+- release/C3-<version>-arm64.dmg (installer image when using DMG targets)
 
 ## Local Setup
 

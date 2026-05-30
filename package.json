@@ -14,7 +14,10 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
-    "package:smoke": "npm run build && electron-builder --dir"
+    "package:smoke": "npm run build && electron-builder --dir",
+    "package:mac:app": "npm run build && electron-builder --mac dir",
+    "package:mac:dmg": "npm run build && electron-builder --mac dmg",
+    "package:mac:prod": "npm run build && electron-builder --mac dir dmg"
   },
   "build": {
     "appId": "com.c3.desktop",
