@@ -102,7 +102,7 @@
 }
 
 .process-row {
-  cursor: pointer;
+  cursor: default;
 }
 
 .process-row:hover {
@@ -195,10 +195,12 @@
   border-radius: 0.4rem;
   padding: 0.24rem 0.55rem;
   font-size: 0.75rem;
+  cursor: pointer;
 }
 
 .action-button:disabled {
   color: var(--text-muted);
+  cursor: default;
 }
 
 .list-state {
