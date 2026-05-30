@@ -6,6 +6,11 @@ import type {
   ProcessSummary
 } from '../../shared/process';
 import type { ProcessRuntime } from './processRuntime';
+import {
+  buildMonitoredColimaProcess,
+  COLIMA_PROCESS_ID,
+  runColimaAction
+} from './processRuntime.colima';
 import { filterProcesses } from './processRuntime.fixtures';
 import {
   buildMonitoredMongoProcess,
@@ -24,7 +29,13 @@ async function buildRealProcessList(platform: NodeJS.Platform): Promise<ProcessS
     buildMonitoredPostgreSqlProcess(platform)
   ]);
 
-  return [mongoProcess, mySqlProcess, postgreSqlProcess];
+  if (platform !== 'darwin') {
+    return [mongoProcess, mySqlProcess, postgreSqlProcess];
+  }
+
+  const colimaProcess = await buildMonitoredColimaProcess(platform);
+
+  return [colimaProcess, mongoProcess, mySqlProcess, postgreSqlProcess];
 }
 
 export function createRealProcessRuntime(platform: NodeJS.Platform = process.platform): ProcessRuntime {
@@ -38,6 +49,17 @@ export function createRealProcessRuntime(platform: NodeJS.Platform = process.pla
       };
     },
     async sendCommand(request: ProcessCommandRequest): Promise<ProcessCommandResponse> {
+      if (request.processId === COLIMA_PROCESS_ID) {
+        const colimaResult = await runColimaAction(request.action, platform);
+
+        return {
+          processId: request.processId,
+          action: request.action,
+          accepted: colimaResult.accepted,
+          message: colimaResult.message
+        };
+      }
+
       return {
         processId: request.processId,
         action: request.action,
