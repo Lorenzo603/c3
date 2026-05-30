@@ -11,11 +11,11 @@ import {
   COLIMA_PROCESS_ID,
   runColimaAction
 } from './processRuntime.colima';
+import { buildMonitoredDockerDatabaseProcesses } from './processRuntime.docker';
 import { filterProcesses } from './processRuntime.fixtures';
 import {
   buildMonitoredMongoProcess,
-  buildMonitoredMySqlProcess,
-  buildMonitoredPostgreSqlProcess
+  buildMonitoredMySqlProcess
 } from './processRuntime.mongodb';
 
 function buildReadOnlyMessage(): string {
@@ -23,19 +23,21 @@ function buildReadOnlyMessage(): string {
 }
 
 async function buildRealProcessList(platform: NodeJS.Platform): Promise<ProcessSummary[]> {
-  const [mongoProcess, mySqlProcess, postgreSqlProcess] = await Promise.all([
+  const [mongoProcess, mySqlProcess, dockerDatabaseProcesses] = await Promise.all([
     buildMonitoredMongoProcess(platform),
     buildMonitoredMySqlProcess(platform),
-    buildMonitoredPostgreSqlProcess(platform)
+    buildMonitoredDockerDatabaseProcesses()
   ]);
 
+  const baseProcesses = [mongoProcess, mySqlProcess, ...dockerDatabaseProcesses];
+
   if (platform !== 'darwin') {
-    return [mongoProcess, mySqlProcess, postgreSqlProcess];
+    return baseProcesses;
   }
 
   const colimaProcess = await buildMonitoredColimaProcess(platform);
 
-  return [colimaProcess, mongoProcess, mySqlProcess, postgreSqlProcess];
+  return [colimaProcess, ...baseProcesses];
 }
 
 export function createRealProcessRuntime(platform: NodeJS.Platform = process.platform): ProcessRuntime {
