@@ -24,7 +24,7 @@ This milestone intentionally focuses on shell architecture, typed contracts, and
 - src/main/services/processRuntime.real.ts: Real environment runtime data providers.
 - src/main/services/processRuntime.stub.ts: Fixture-only runtime for test mode.
 - src/main/services/processRuntime.fixtures.ts: Mock process dataset + server-side filtering.
-- src/main/services/processRuntime.mongodb.ts: Live MongoDB local monitor (port 27017 + PID lookup).
+- src/main/services/processRuntime.database.ts: Live local database monitors (MongoDB/MySQL) with port and PID lookup.
 - src/preload/index.ts: Typed contextBridge API exposed to renderer.
 - src/shared/process.ts: Domain model + IPC request/response contracts.
 - src/renderer/main.tsx: Renderer bootstrap.

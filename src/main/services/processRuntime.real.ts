@@ -20,7 +20,7 @@ import { filterProcesses } from './processRuntime.fixtures';
 import {
   buildMonitoredMongoProcess,
   buildMonitoredMySqlProcess
-} from './processRuntime.mongodb';
+} from './processRuntime.database';
 import {
   buildMonitoredCloudSqlProxyConnectionsProcess,
   CLOUD_SQL_PROXY_PROCESS_ID,

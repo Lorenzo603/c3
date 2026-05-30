@@ -123,20 +123,6 @@ export async function buildMonitoredMySqlProcess(
   });
 }
 
-export async function buildMonitoredPostgreSqlProcess(
-  platform: NodeJS.Platform = process.platform
-): Promise<ProcessSummary> {
-  return buildMonitoredDatabaseProcess(platform, {
-    id: 'postgresql-local',
-    name: 'PostgreSQL Local',
-    logoPath: '/process-logos/postgresql.svg',
-    port: POSTGRESQL_LOCAL_PORT,
-    runningDescription: 'Local PostgreSQL instance detected on localhost:5432',
-    stoppedDescription: 'Watching for local PostgreSQL on localhost:5432',
-    readOnlyReason: 'PostgreSQL is monitored only in this milestone; control actions are disabled.'
-  });
-}
-
 async function buildMonitoredDatabaseProcess(
   platform: NodeJS.Platform,
   config: MonitoredDatabaseConfig
