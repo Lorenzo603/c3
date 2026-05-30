@@ -6,16 +6,22 @@ const execFileAsync = promisify(execFile);
 
 const POSTGRES_DOCKER_PORT = 5432;
 const REDIS_DOCKER_PORT = 6379;
+const QDRANT_DOCKER_HTTP_PORT = 6333;
+const QDRANT_DOCKER_GRPC_PORT = 6334;
 const COLIMA_NOT_STARTED_MESSAGE = 'Colima not started';
 const DOCKER_UNAVAILABLE_REASON = 'Colima not started';
 
 export const DOCKER_POSTGRES_PROCESS_ID = 'docker-postgres';
 export const DOCKER_REDIS_PROCESS_ID = 'docker-redis';
+export const DOCKER_QDRANT_PROCESS_ID = 'docker-qdrant';
 
 interface DockerProcessConfig {
-  id: typeof DOCKER_POSTGRES_PROCESS_ID | typeof DOCKER_REDIS_PROCESS_ID;
+  id:
+    | typeof DOCKER_POSTGRES_PROCESS_ID
+    | typeof DOCKER_REDIS_PROCESS_ID
+    | typeof DOCKER_QDRANT_PROCESS_ID;
   name: string;
-  port: number;
+  ports: number[];
   matchHints: string[];
 }
 
@@ -23,14 +29,20 @@ const DOCKER_PROCESS_CONFIGS: DockerProcessConfig[] = [
   {
     id: DOCKER_POSTGRES_PROCESS_ID,
     name: 'PostgreSQL (Docker)',
-    port: POSTGRES_DOCKER_PORT,
+    ports: [POSTGRES_DOCKER_PORT],
     matchHints: ['postgres', 'postgis']
   },
   {
     id: DOCKER_REDIS_PROCESS_ID,
     name: 'Redis (Docker)',
-    port: REDIS_DOCKER_PORT,
+    ports: [REDIS_DOCKER_PORT],
     matchHints: ['redis']
+  },
+  {
+    id: DOCKER_QDRANT_PROCESS_ID,
+    name: 'Qdrant (Docker)',
+    ports: [QDRANT_DOCKER_HTTP_PORT, QDRANT_DOCKER_GRPC_PORT],
+    matchHints: ['qdrant']
   }
 ];
 
@@ -141,6 +153,21 @@ function findContainerByPort(containers: DockerContainerSummary[], port: number)
   });
 }
 
+function findContainerByPorts(
+  containers: DockerContainerSummary[],
+  ports: number[]
+): DockerContainerSummary | undefined {
+  for (const port of ports) {
+    const container = findContainerByPort(containers, port);
+
+    if (container) {
+      return container;
+    }
+  }
+
+  return undefined;
+}
+
 function findContainerByHints(
   containers: DockerContainerSummary[],
   hints: string[]
@@ -158,7 +185,7 @@ function findContainerForConfig(
   config: DockerProcessConfig
 ): DockerContainerSummary | undefined {
   return (
-    findContainerByPort(containers, config.port) ??
+    findContainerByPorts(containers, config.ports) ??
     findContainerByHints(containers, config.matchHints)
   );
 }
@@ -196,6 +223,8 @@ function buildDockerProcessSummary(
   runtimeState: DockerRuntimeState,
   config: DockerProcessConfig
 ): ProcessSummary {
+  const portsLabel = config.ports.join(',');
+
   if (!runtimeState.available) {
     return {
       id: config.id,
@@ -203,7 +232,7 @@ function buildDockerProcessSummary(
       source: 'docker',
       status: 'stopped',
       health: 'warning',
-      ports: [config.port],
+      ports: config.ports,
       description: COLIMA_NOT_STARTED_MESSAGE,
       lastUpdatedIso: new Date().toISOString(),
       actions: {
@@ -223,21 +252,21 @@ function buildDockerProcessSummary(
     source: 'docker',
     status: isRunning ? 'running' : 'stopped',
     health: hasContainer ? (isRunning ? 'healthy' : 'warning') : 'critical',
-    ports: [config.port],
+    ports: config.ports,
     description: hasContainer
       ? isRunning
-        ? `Running in Docker container ${container.name} (${container.image}) on port ${config.port}`
-        : `Docker container ${container.name} is stopped on port ${config.port}`
-      : `Watching Docker containers on port ${config.port}`,
+        ? `Running in Docker container ${container.name} (${container.image}) on ports ${portsLabel}`
+        : `Docker container ${container.name} is stopped on ports ${portsLabel}`
+      : `Watching Docker containers on ports ${portsLabel}`,
     lastUpdatedIso: new Date().toISOString(),
     actions: {
       start: !hasContainer
-        ? unsupportedActionCapability(`No Docker container found exposing port ${config.port}.`)
+        ? unsupportedActionCapability(`No Docker container found exposing ports ${portsLabel}.`)
         : isRunning
           ? disabledActionCapability('Container is already running.')
           : enabledActionCapability('Start container'),
       stop: !hasContainer
-        ? unsupportedActionCapability(`No Docker container found exposing port ${config.port}.`)
+        ? unsupportedActionCapability(`No Docker container found exposing ports ${portsLabel}.`)
         : isRunning
           ? enabledActionCapability('Stop container')
           : disabledActionCapability('Container is already stopped.')
@@ -251,8 +280,14 @@ export async function buildMonitoredDockerProcesses(): Promise<ProcessSummary[]>
   return DOCKER_PROCESS_CONFIGS.map((config) => buildDockerProcessSummary(runtimeState, config));
 }
 
-export function isDockerProcessId(processId: string): processId is typeof DOCKER_POSTGRES_PROCESS_ID | typeof DOCKER_REDIS_PROCESS_ID {
-  return processId === DOCKER_POSTGRES_PROCESS_ID || processId === DOCKER_REDIS_PROCESS_ID;
+export function isDockerProcessId(
+  processId: string
+): processId is typeof DOCKER_POSTGRES_PROCESS_ID | typeof DOCKER_REDIS_PROCESS_ID | typeof DOCKER_QDRANT_PROCESS_ID {
+  return (
+    processId === DOCKER_POSTGRES_PROCESS_ID
+    || processId === DOCKER_REDIS_PROCESS_ID
+    || processId === DOCKER_QDRANT_PROCESS_ID
+  );
 }
 
 export async function runDockerProcessAction(processId: string, action: ProcessAction): Promise<DockerCommandResult> {
@@ -277,9 +312,11 @@ export async function runDockerProcessAction(processId: string, action: ProcessA
   const container = findContainerForConfig(runtimeState.containers, config);
 
   if (!container) {
+    const portsLabel = config.ports.join(',');
+
     return {
       accepted: false,
-      message: `No Docker container found exposing port ${config.port}.`
+      message: `No Docker container found exposing ports ${portsLabel}.`
     };
   }
 

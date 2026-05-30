@@ -187,6 +187,32 @@ describe('docker process monitoring', () => {
     expect(redis.description).toContain('redis-cache');
   });
 
+  it('detects Qdrant on ports 6333 and 6334', async () => {
+    mockDockerPs([
+      {
+        ID: 'qd001',
+        Names: 'qdrant-node',
+        Image: 'qdrant/qdrant:latest',
+        Ports: '0.0.0.0:6333->6333/tcp, 0.0.0.0:6334->6334/tcp',
+        Status: 'Up 7 minutes'
+      }
+    ]);
+
+    const { buildMonitoredDockerProcesses } = await importDockerRuntime();
+
+    const items = await buildMonitoredDockerProcesses();
+    const qdrant = findProcessById(items, 'docker-qdrant');
+
+    expect(qdrant).toMatchObject({
+      status: 'running',
+      health: 'healthy',
+      ports: [6333, 6334]
+    });
+    expect(qdrant.actions.start.enabled).toBe(false);
+    expect(qdrant.actions.stop.enabled).toBe(true);
+    expect(qdrant.description).toContain('qdrant-node');
+  });
+
   it('falls back to image/name matching when ports text is unavailable', async () => {
     mockDockerPs([
       {
@@ -294,5 +320,41 @@ describe('docker process monitoring', () => {
     expect(result.command).toBe('docker stop rd001');
     expect(result.message).toMatch(/stopped successfully/i);
     expect(result.output).toContain('rd001');
+  });
+
+  it('starts a stopped Qdrant container', async () => {
+    mockDockerExec((dockerArgs) => {
+      if (dockerArgs[0] === 'ps' && dockerArgs.includes('-a')) {
+        return {
+          stdout: JSON.stringify({
+            ID: 'qd001',
+            Names: 'qdrant-node',
+            Image: 'qdrant/qdrant:latest',
+            Ports: '0.0.0.0:6333->6333/tcp, 0.0.0.0:6334->6334/tcp',
+            Status: 'Exited (0) 2 minutes ago'
+          }),
+          stderr: ''
+        };
+      }
+
+      if (dockerArgs[0] === 'start' && dockerArgs[1] === 'qd001') {
+        return {
+          stdout: 'qd001',
+          stderr: ''
+        };
+      }
+
+      return {
+        error: new Error(`unexpected docker args: ${dockerArgs.join(' ')}`)
+      };
+    });
+
+    const { runDockerProcessAction } = await importDockerRuntime();
+    const result = await runDockerProcessAction('docker-qdrant', 'start');
+
+    expect(result.accepted).toBe(true);
+    expect(result.command).toBe('docker start qd001');
+    expect(result.message).toMatch(/started successfully/i);
+    expect(result.output).toContain('qd001');
   });
 });
