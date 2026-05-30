@@ -21,6 +21,7 @@ const CLOUD_SQL_PROXY_SCRIPT_PATH = join(
 );
 
 const CLOUD_SQL_PROXY_SCRIPT_BASENAME = 'open-cloud-sql-proxy-connectons.sh';
+const CLOUD_SQL_PROXY_PROCESS_PATTERN = 'cloud-sql-proxy --auto-iam-authn';
 
 interface ScriptRuntimeStatus {
   scriptPath: string;
@@ -59,11 +60,28 @@ function disabledActionCapability(reason: string) {
   };
 }
 
-function parsePids(stdout: string): number[] {
+function parsePsLines(stdout: string): Array<{ pid: number; command: string }> {
   return stdout
     .split('\n')
-    .map((line) => Number.parseInt(line.trim(), 10))
-    .filter((value) => Number.isInteger(value) && value > 0);
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map((line) => {
+      const firstSpace = line.indexOf(' ');
+
+      if (firstSpace <= 0) {
+        return null;
+      }
+
+      const pid = Number.parseInt(line.slice(0, firstSpace).trim(), 10);
+      const command = line.slice(firstSpace + 1).trim();
+
+      if (!Number.isInteger(pid) || pid <= 0 || command.length === 0) {
+        return null;
+      }
+
+      return { pid, command };
+    })
+    .filter((entry): entry is { pid: number; command: string } => entry !== null);
 }
 
 function buildOutput(stdout: string, stderr: string): string | undefined {
@@ -84,15 +102,18 @@ function errorOutput(error: unknown): string {
 
 async function readPidsByPattern(pattern: string): Promise<number[]> {
   try {
-    const { stdout } = await execFileAsync('pgrep', ['-f', pattern]);
-    return parsePids(stdout);
+    const { stdout } = await execFileAsync('ps', ['-ax', '-o', 'pid=,command=']);
+
+    return parsePsLines(stdout)
+      .filter((entry) => entry.pid !== process.pid)
+      .filter((entry) => entry.command.includes(pattern))
+      .map((entry) => entry.pid);
   } catch (error) {
     if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
       return [];
     }
 
-    const output = errorOutput(error);
-    return output.length > 0 ? parsePids(output) : [];
+    return [];
   }
 }
 
@@ -107,6 +128,8 @@ async function readScriptRuntimeStatus(): Promise<ScriptRuntimeStatus> {
   }
 
   if (!available) {
+    managedCloudSqlProxyPid = undefined;
+
     return {
       scriptPath: CLOUD_SQL_PROXY_SCRIPT_PATH,
       available: false,
@@ -114,9 +137,12 @@ async function readScriptRuntimeStatus(): Promise<ScriptRuntimeStatus> {
     };
   }
 
-  const pidsFromAbsolutePath = await readPidsByPattern(CLOUD_SQL_PROXY_SCRIPT_PATH);
-  const pidsFromBasename = await readPidsByPattern(CLOUD_SQL_PROXY_SCRIPT_BASENAME);
-  const uniquePids = [...new Set([...pidsFromAbsolutePath, ...pidsFromBasename])];
+  if (managedCloudSqlProxyPid && !isPidAlive(managedCloudSqlProxyPid)) {
+    managedCloudSqlProxyPid = undefined;
+  }
+
+  const pidsFromProxyCommand = await readPidsByPattern(CLOUD_SQL_PROXY_PROCESS_PATTERN);
+  const uniquePids = [...new Set(pidsFromProxyCommand)];
 
   return {
     scriptPath: CLOUD_SQL_PROXY_SCRIPT_PATH,
@@ -144,6 +170,15 @@ function hasNoMatches(error: unknown): boolean {
 
 function isProcessNotFound(error: unknown): boolean {
   return Boolean(error && typeof error === 'object' && 'code' in error && error.code === 'ESRCH');
+}
+
+function isPidAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return !isProcessNotFound(error);
+  }
 }
 
 export function stopManagedCloudSqlProxyConnectionsProcess(): ScriptActionResult {
@@ -211,10 +246,6 @@ export async function buildMonitoredCloudSqlProxyConnectionsProcess(
   }
 
   const status = await readScriptRuntimeStatus();
-  if (managedCloudSqlProxyPid && !status.runningPids.includes(managedCloudSqlProxyPid)) {
-    managedCloudSqlProxyPid = undefined;
-  }
-
   const isRunning = status.runningPids.length > 0;
 
   if (!status.available) {
@@ -318,7 +349,7 @@ export async function runCloudSqlProxyConnectionsAction(
     }
   }
 
-  if (!isRunning) {
+  if (!isRunning && !managedCloudSqlProxyPid) {
     return {
       accepted: false,
       message: 'Cloud SQL Proxy script is already stopped.'
@@ -334,20 +365,32 @@ export async function runCloudSqlProxyConnectionsAction(
       }
     }
 
-    let stopResult: { command: string; output?: string };
+    let stopResult: { command: string; output?: string } | undefined;
 
-    try {
-      stopResult = await runKillByPattern(status.scriptPath);
-    } catch (error) {
-      if (isCommandMissing(error)) {
-        throw error;
+    for (const pattern of [
+      status.scriptPath,
+      CLOUD_SQL_PROXY_SCRIPT_BASENAME,
+      CLOUD_SQL_PROXY_PROCESS_PATTERN
+    ]) {
+      try {
+        stopResult = await runKillByPattern(pattern);
+        break;
+      } catch (error) {
+        if (isCommandMissing(error)) {
+          throw error;
+        }
+
+        if (!hasNoMatches(error)) {
+          throw error;
+        }
       }
+    }
 
-      if (!hasNoMatches(error)) {
-        throw error;
-      }
-
-      stopResult = await runKillByPattern(CLOUD_SQL_PROXY_SCRIPT_BASENAME);
+    if (!stopResult) {
+      return {
+        accepted: false,
+        message: 'Cloud SQL Proxy script was not found to stop.'
+      };
     }
 
     return {
