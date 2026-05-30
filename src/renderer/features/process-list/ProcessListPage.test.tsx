@@ -99,4 +99,27 @@ describe('ProcessListPage', () => {
       expect(screen.getByText('API Gateway')).toBeInTheDocument();
     });
   });
+
+  it('refreshes process status when Refresh is clicked', async () => {
+    const spy = vi.fn<() => Promise<GetProcessListResponse>>().mockResolvedValue({
+      items: processFixtures,
+      fetchedAtIso: new Date().toISOString()
+    });
+
+    const gateway = createGateway(spy);
+
+    render(<ProcessListPage gateway={gateway} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('API Gateway')).toBeInTheDocument();
+    });
+
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(2);
+    });
+  });
 });

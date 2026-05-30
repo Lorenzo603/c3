@@ -33,6 +33,27 @@
   padding: 0.55rem 0.65rem;
 }
 
+.filter-refresh-group {
+  display: grid;
+  align-content: end;
+}
+
+.filter-refresh-button {
+  border: 1px solid var(--border-soft);
+  border-radius: 0.5rem;
+  background: var(--brand);
+  color: #fff;
+  padding: 0.58rem 0.85rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-refresh-button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
 .process-content {
   min-height: 0;
   display: grid;
@@ -249,5 +270,9 @@
 
   .filter-bar {
     grid-template-columns: 1fr;
+  }
+
+  .filter-refresh-group {
+    align-content: stretch;
   }
 }

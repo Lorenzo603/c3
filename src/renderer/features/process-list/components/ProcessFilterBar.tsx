@@ -5,13 +5,17 @@ export interface ProcessFilterBarProps {
   onSearchChange: (value: string) => void;
   onSourceChange: (value: ProcessSource | 'all') => void;
   onStatusChange: (value: ProcessStatus | 'all') => void;
+  onRefresh: () => void;
+  isRefreshing?: boolean;
 }
 
 export function ProcessFilterBar({
   query,
   onSearchChange,
   onSourceChange,
-  onStatusChange
+  onStatusChange,
+  onRefresh,
+  isRefreshing = false
 }: ProcessFilterBarProps) {
   return (
     <section className="filter-bar" aria-label="Process filters">
@@ -56,6 +60,17 @@ export function ProcessFilterBar({
           <option value="unknown">Unknown</option>
         </select>
       </label>
+
+      <div className="filter-refresh-group">
+        <button
+          type="button"
+          className="filter-refresh-button"
+          onClick={onRefresh}
+          disabled={isRefreshing}
+        >
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
     </section>
   );
 }

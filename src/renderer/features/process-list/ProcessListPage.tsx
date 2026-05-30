@@ -44,6 +44,10 @@ export function ProcessListPage({ gateway }: ProcessListPageProps) {
         onSearchChange={setSearch}
         onSourceChange={setSource}
         onStatusChange={setStatus}
+        onRefresh={() => {
+          void reload();
+        }}
+        isRefreshing={state.isLoading}
       />
 
       <div className="process-content">

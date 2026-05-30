@@ -9,6 +9,19 @@ interface DockerPsEntry {
   Ports: string;
 }
 
+function findProcessById(
+  items: Awaited<ReturnType<(typeof import('./processRuntime.docker'))['buildMonitoredDockerDatabaseProcesses']>>,
+  id: string
+) {
+  const item = items.find((candidate) => candidate.id === id);
+
+  if (!item) {
+    throw new Error(`Expected process with id ${id} to be present`);
+  }
+
+  return item;
+}
+
 function mockDockerPs(entries: DockerPsEntry[]) {
   execFileMock.mockImplementation(
     (...args: unknown[]) => {
@@ -85,7 +98,9 @@ describe('docker process monitoring', () => {
 
     const { buildMonitoredDockerDatabaseProcesses } = await importDockerRuntime();
 
-    const [postgres, redis] = await buildMonitoredDockerDatabaseProcesses();
+    const items = await buildMonitoredDockerDatabaseProcesses();
+    const postgres = findProcessById(items, 'docker-postgres');
+    const redis = findProcessById(items, 'docker-redis');
 
     expect(postgres).toMatchObject({
       id: 'docker-postgres',
@@ -115,7 +130,9 @@ describe('docker process monitoring', () => {
 
     const { buildMonitoredDockerDatabaseProcesses } = await importDockerRuntime();
 
-    const [postgres, redis] = await buildMonitoredDockerDatabaseProcesses();
+    const items = await buildMonitoredDockerDatabaseProcesses();
+    const postgres = findProcessById(items, 'docker-postgres');
+    const redis = findProcessById(items, 'docker-redis');
 
     expect(postgres.status).toBe('stopped');
     expect(redis).toMatchObject({
@@ -132,7 +149,9 @@ describe('docker process monitoring', () => {
 
     const { buildMonitoredDockerDatabaseProcesses } = await importDockerRuntime();
 
-    const [postgres, redis] = await buildMonitoredDockerDatabaseProcesses();
+    const items = await buildMonitoredDockerDatabaseProcesses();
+    const postgres = findProcessById(items, 'docker-postgres');
+    const redis = findProcessById(items, 'docker-redis');
 
     expect(postgres.description).toBe('Colima not started');
     expect(redis.description).toBe('Colima not started');
