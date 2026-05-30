@@ -31,6 +31,7 @@ export interface ProcessActionCapabilities {
 export interface ProcessSummary {
   id: string;
   name: string;
+  logoPath: string;
   source: ProcessSource;
   status: ProcessStatus;
   health: ProcessHealth;

@@ -14,6 +14,7 @@ const LOOPBACK_HOSTS = ['127.0.0.1', '::1'];
 interface MonitoredDatabaseConfig {
   id: string;
   name: string;
+  logoPath: string;
   port: number;
   runningDescription: string;
   stoppedDescription: string;
@@ -100,6 +101,7 @@ export async function buildMonitoredMongoProcess(
   return buildMonitoredDatabaseProcess(platform, {
     id: 'mongodb-local',
     name: 'MongoDB Local',
+    logoPath: '/process-logos/mongodb.svg',
     port: MONGODB_LOCAL_PORT,
     runningDescription: 'Local MongoDB instance detected on localhost:27017',
     stoppedDescription: 'Watching for local MongoDB on localhost:27017',
@@ -113,6 +115,7 @@ export async function buildMonitoredMySqlProcess(
   return buildMonitoredDatabaseProcess(platform, {
     id: 'mysql-local',
     name: 'MySQL Local',
+    logoPath: '/process-logos/mysql.svg',
     port: MYSQL_LOCAL_PORT,
     runningDescription: 'Local MySQL instance detected on localhost:3306',
     stoppedDescription: 'Watching for local MySQL on localhost:3306',
@@ -126,6 +129,7 @@ export async function buildMonitoredPostgreSqlProcess(
   return buildMonitoredDatabaseProcess(platform, {
     id: 'postgresql-local',
     name: 'PostgreSQL Local',
+    logoPath: '/process-logos/postgresql.svg',
     port: POSTGRESQL_LOCAL_PORT,
     runningDescription: 'Local PostgreSQL instance detected on localhost:5432',
     stoppedDescription: 'Watching for local PostgreSQL on localhost:5432',
@@ -146,6 +150,7 @@ async function buildMonitoredDatabaseProcess(
   return {
     id: config.id,
     name: config.name,
+    logoPath: config.logoPath,
     source: 'database',
     status: isRunning ? 'running' : 'stopped',
     health: isRunning ? 'healthy' : 'critical',

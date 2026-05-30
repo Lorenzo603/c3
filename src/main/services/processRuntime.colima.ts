@@ -132,6 +132,7 @@ export async function buildMonitoredColimaProcess(
     return {
       id: COLIMA_PROCESS_ID,
       name: 'Colima',
+      logoPath: '/process-logos/colima.svg',
       source: 'docker',
       status: 'unknown',
       health: 'unknown',
@@ -151,6 +152,7 @@ export async function buildMonitoredColimaProcess(
     return {
       id: COLIMA_PROCESS_ID,
       name: 'Colima',
+      logoPath: '/process-logos/colima.svg',
       source: 'docker',
       status: 'stopped',
       health: 'unknown',
@@ -167,6 +169,7 @@ export async function buildMonitoredColimaProcess(
   return {
     id: COLIMA_PROCESS_ID,
     name: 'Colima',
+    logoPath: '/process-logos/colima.svg',
     source: 'docker',
     status: status.running ? 'running' : 'stopped',
     health: status.running ? 'healthy' : 'warning',

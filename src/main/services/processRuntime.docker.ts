@@ -21,6 +21,7 @@ interface DockerProcessConfig {
     | typeof DOCKER_REDIS_PROCESS_ID
     | typeof DOCKER_QDRANT_PROCESS_ID;
   name: string;
+  logoPath: string;
   ports: number[];
   matchHints: string[];
 }
@@ -29,18 +30,21 @@ const DOCKER_PROCESS_CONFIGS: DockerProcessConfig[] = [
   {
     id: DOCKER_POSTGRES_PROCESS_ID,
     name: 'PostgreSQL (Docker)',
+    logoPath: '/process-logos/postgresql.svg',
     ports: [POSTGRES_DOCKER_PORT],
     matchHints: ['postgres', 'postgis']
   },
   {
     id: DOCKER_REDIS_PROCESS_ID,
     name: 'Redis (Docker)',
+    logoPath: '/process-logos/redis.svg',
     ports: [REDIS_DOCKER_PORT],
     matchHints: ['redis']
   },
   {
     id: DOCKER_QDRANT_PROCESS_ID,
     name: 'Qdrant (Docker)',
+    logoPath: '/process-logos/qdrant.svg',
     ports: [QDRANT_DOCKER_HTTP_PORT, QDRANT_DOCKER_GRPC_PORT],
     matchHints: ['qdrant']
   }
@@ -229,6 +233,7 @@ function buildDockerProcessSummary(
     return {
       id: config.id,
       name: config.name,
+      logoPath: config.logoPath,
       source: 'docker',
       status: 'stopped',
       health: 'warning',
@@ -249,6 +254,7 @@ function buildDockerProcessSummary(
   return {
     id: config.id,
     name: config.name,
+    logoPath: config.logoPath,
     source: 'docker',
     status: isRunning ? 'running' : 'stopped',
     health: hasContainer ? (isRunning ? 'healthy' : 'warning') : 'critical',

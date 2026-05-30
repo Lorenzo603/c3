@@ -31,6 +31,7 @@ function buildControllableProcess(): ProcessSummary {
   return {
     id: 'colima-local',
     name: 'Colima',
+    logoPath: '/process-logos/colima.svg',
     source: 'docker',
     status: 'stopped',
     health: 'warning',

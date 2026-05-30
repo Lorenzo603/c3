@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ProcessAction, ProcessSummary } from '../../../../shared/process';
 import { SourceBadge } from './SourceBadge';
 import { StatusBadge } from './StatusBadge';
@@ -28,6 +29,35 @@ function ActionButton({
   );
 }
 
+function buildLogoFallback(name: string): string {
+  const initials = name
+    .split(/\s+/)
+    .filter((token) => token.length > 0)
+    .slice(0, 2)
+    .map((token) => token[0]?.toUpperCase() ?? '')
+    .join('');
+
+  return initials.length > 0 ? initials : '?';
+}
+
+function ProcessLogo({ name, logoPath }: { name: string; logoPath: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed || logoPath.length === 0) {
+    return <span className="process-logo-fallback">{buildLogoFallback(name)}</span>;
+  }
+
+  return (
+    <img
+      className="process-logo-image"
+      src={logoPath}
+      alt=""
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 export function ProcessListRow({ process, isSelected, pendingAction, onSelect, onAction }: ProcessListRowProps) {
   const isBusy = Boolean(pendingAction);
 
@@ -38,9 +68,14 @@ export function ProcessListRow({ process, isSelected, pendingAction, onSelect, o
       aria-selected={isSelected}
     >
       <td>
-        <div className="process-name-cell">
-          <strong>{process.name}</strong>
-          <small>{process.description ?? 'No description'}</small>
+        <div className="process-primary-cell">
+          <div className="process-logo-tile" aria-hidden="true">
+            <ProcessLogo name={process.name} logoPath={process.logoPath} />
+          </div>
+          <div className="process-name-cell">
+            <strong>{process.name}</strong>
+            <small>{process.description ?? 'No description'}</small>
+          </div>
         </div>
       </td>
       <td>

@@ -196,6 +196,7 @@ export async function buildMonitoredCloudSqlProxyConnectionsProcess(
     return {
       id: CLOUD_SQL_PROXY_PROCESS_ID,
       name: 'Cloud SQL Proxy Connections',
+      logoPath: '/process-logos/cloud-sql-proxy.svg',
       source: 'scripts',
       status: 'unknown',
       health: 'unknown',
@@ -220,6 +221,7 @@ export async function buildMonitoredCloudSqlProxyConnectionsProcess(
     return {
       id: CLOUD_SQL_PROXY_PROCESS_ID,
       name: 'Cloud SQL Proxy Connections',
+      logoPath: '/process-logos/cloud-sql-proxy.svg',
       source: 'scripts',
       status: 'stopped',
       health: 'unknown',
@@ -236,6 +238,7 @@ export async function buildMonitoredCloudSqlProxyConnectionsProcess(
   return {
     id: CLOUD_SQL_PROXY_PROCESS_ID,
     name: 'Cloud SQL Proxy Connections',
+    logoPath: '/process-logos/cloud-sql-proxy.svg',
     source: 'scripts',
     status: isRunning ? 'running' : 'stopped',
     health: isRunning ? 'healthy' : 'warning',

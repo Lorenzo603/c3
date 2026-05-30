@@ -10,6 +10,7 @@ export function buildProcessFixtures(platformLabel: string): ProcessSummary[] {
     {
       id: 'api-gateway',
       name: 'API Gateway',
+      logoPath: '/process-logos/api-gateway.svg',
       source: 'native',
       status: 'running',
       health: 'healthy',
@@ -26,6 +27,7 @@ export function buildProcessFixtures(platformLabel: string): ProcessSummary[] {
     {
       id: 'worker-sync',
       name: 'Sync Worker',
+      logoPath: '/process-logos/sync-worker.svg',
       source: 'custom',
       status: 'degraded',
       health: 'warning',
@@ -42,6 +44,7 @@ export function buildProcessFixtures(platformLabel: string): ProcessSummary[] {
     {
       id: 'docker-redis',
       name: 'Redis Cache',
+      logoPath: '/process-logos/redis.svg',
       source: 'docker',
       status: 'running',
       health: 'healthy',
@@ -58,6 +61,7 @@ export function buildProcessFixtures(platformLabel: string): ProcessSummary[] {
     {
       id: 'postgres',
       name: 'Postgres DB',
+      logoPath: '/process-logos/postgresql.svg',
       source: 'database',
       status: 'stopped',
       health: 'critical',
@@ -74,6 +78,7 @@ export function buildProcessFixtures(platformLabel: string): ProcessSummary[] {
     {
       id: 'scheduler',
       name: 'Job Scheduler',
+      logoPath: '/process-logos/scheduler.svg',
       source: 'native',
       status: 'starting',
       health: 'unknown',
