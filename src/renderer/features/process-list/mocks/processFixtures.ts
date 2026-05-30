@@ -40,7 +40,7 @@ export const processFixtures: ProcessSummary[] = [
   {
     id: 'redis',
     name: 'Redis Cache',
-    logoPath: '/process-logos/redis.svg',
+    logoPath: '/process-logos/redis.png',
     source: 'docker',
     status: 'running',
     health: 'healthy',

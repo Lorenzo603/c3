@@ -37,7 +37,7 @@ const DOCKER_PROCESS_CONFIGS: DockerProcessConfig[] = [
   {
     id: DOCKER_REDIS_PROCESS_ID,
     name: 'Redis (Docker)',
-    logoPath: '/process-logos/redis.svg',
+    logoPath: '/process-logos/redis.png',
     ports: [REDIS_DOCKER_PORT],
     matchHints: ['redis']
   },

@@ -44,7 +44,7 @@ export function buildProcessFixtures(platformLabel: string): ProcessSummary[] {
     {
       id: 'docker-redis',
       name: 'Redis Cache',
-      logoPath: '/process-logos/redis.svg',
+      logoPath: '/process-logos/redis.png',
       source: 'docker',
       status: 'running',
       health: 'healthy',
