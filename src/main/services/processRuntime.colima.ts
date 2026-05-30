@@ -12,6 +12,18 @@ interface ColimaStatus {
   details?: string;
 }
 
+interface ColimaCommandResult {
+  command: string;
+  output?: string;
+}
+
+interface ColimaActionResult {
+  accepted: boolean;
+  message: string;
+  command?: string;
+  output?: string;
+}
+
 function readOnlyCapability(reason: string) {
   return {
     supported: false,
@@ -103,8 +115,14 @@ async function readColimaStatus(): Promise<ColimaStatus> {
   }
 }
 
-async function runColima(args: string[]): Promise<void> {
-  await execFileAsync('colima', args);
+async function runColima(args: string[]): Promise<ColimaCommandResult> {
+  const { stdout, stderr } = await execFileAsync('colima', args);
+  const output = `${stdout}\n${stderr}`.trim();
+
+  return {
+    command: `colima ${args.join(' ')}`,
+    output: output.length > 0 ? output : undefined
+  };
 }
 
 export async function buildMonitoredColimaProcess(
@@ -176,7 +194,7 @@ export async function buildMonitoredColimaProcess(
 export async function runColimaAction(
   action: ProcessAction,
   platform: NodeJS.Platform = process.platform
-): Promise<{ accepted: boolean; message: string }> {
+): Promise<ColimaActionResult> {
   if (platform !== 'darwin') {
     return {
       accepted: false,
@@ -202,11 +220,13 @@ export async function runColimaAction(
         };
       }
 
-      await runColima(['start']);
+      const result = await runColima(['start']);
 
       return {
         accepted: true,
-        message: 'Colima started successfully.'
+        message: 'Colima started successfully.',
+        command: result.command,
+        output: result.output
       };
     }
 
@@ -218,11 +238,13 @@ export async function runColimaAction(
         };
       }
 
-      await runColima(['stop']);
+      const result = await runColima(['stop']);
 
       return {
         accepted: true,
-        message: 'Colima stopped successfully.'
+        message: 'Colima stopped successfully.',
+        command: result.command,
+        output: result.output
       };
     }
 
@@ -233,19 +255,25 @@ export async function runColimaAction(
       };
     }
 
-    await runColima(['stop']);
-    await runColima(['start']);
+    const stopResult = await runColima(['stop']);
+    const startResult = await runColima(['start']);
+    const combinedOutput = [stopResult.output, startResult.output]
+      .filter((chunk) => typeof chunk === 'string' && chunk.length > 0)
+      .join('\n\n');
 
     return {
       accepted: true,
-      message: 'Colima restarted successfully.'
+      message: 'Colima restarted successfully.',
+      command: `${stopResult.command} && ${startResult.command}`,
+      output: combinedOutput.length > 0 ? combinedOutput : undefined
     };
   } catch (error) {
     const details = errorOutput(error);
 
     return {
       accepted: false,
-      message: details || `Failed to ${action} Colima.`
+      message: details || `Failed to ${action} Colima.`,
+      output: details || undefined
     };
   }
 }

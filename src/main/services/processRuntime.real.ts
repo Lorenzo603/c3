@@ -58,7 +58,9 @@ export function createRealProcessRuntime(platform: NodeJS.Platform = process.pla
           processId: request.processId,
           action: request.action,
           accepted: colimaResult.accepted,
-          message: colimaResult.message
+          message: colimaResult.message,
+          command: colimaResult.command,
+          output: colimaResult.output
         };
       }
 

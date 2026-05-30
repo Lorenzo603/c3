@@ -68,6 +68,8 @@ export interface ProcessCommandResponse {
   action: ProcessAction;
   accepted: boolean;
   message: string;
+  command?: string;
+  output?: string;
 }
 
 export interface C3DesktopApi {

@@ -1,5 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { ProcessAction } from '../../../shared/process';
+import {
+  ProcessCommandLogBar,
+  type ProcessCommandLogEntry
+} from './components/ProcessCommandLogBar';
 import { ProcessFilterBar } from './components/ProcessFilterBar';
 import { ProcessDetailPanel } from './components/ProcessDetailPanel';
 import { EmptyState, ErrorState, LoadingState } from './components/ProcessListStates';
@@ -21,6 +25,12 @@ function isFixtureModeEnabled(): boolean {
 }
 
 export function ProcessListPage({ gateway }: ProcessListPageProps) {
+  const [pendingActionsByProcessId, setPendingActionsByProcessId] = useState<
+    Partial<Record<string, ProcessAction>>
+  >({});
+  const [commandLogEntries, setCommandLogEntries] = useState<ProcessCommandLogEntry[]>([]);
+  const logCounter = useRef(0);
+
   const effectiveGateway = useMemo(
     () =>
       gateway ??
@@ -32,9 +42,72 @@ export function ProcessListPage({ gateway }: ProcessListPageProps) {
   const { state, setSearch, setSource, setStatus, reload } = useProcessCollection(effectiveGateway);
   const { selectedProcessId, selectedProcess, selectProcess } = useProcessSelection(state.items);
 
+  function appendCommandLog(entry: Omit<ProcessCommandLogEntry, 'id'>) {
+    setCommandLogEntries((previous) => [
+      {
+        id: logCounter.current++,
+        ...entry
+      },
+      ...previous
+    ].slice(0, 120));
+  }
+
+  function actionProgressLabel(action: ProcessAction): string {
+    if (action === 'start') {
+      return 'Starting...';
+    }
+
+    if (action === 'stop') {
+      return 'Stopping...';
+    }
+
+    return 'Restarting...';
+  }
+
   async function handleAction(processId: string, action: ProcessAction) {
-    await effectiveGateway.sendProcessCommand({ processId, action });
-    await reload();
+    const processName = state.items.find((item) => item.id === processId)?.name ?? processId;
+
+    setPendingActionsByProcessId((previous) => ({
+      ...previous,
+      [processId]: action
+    }));
+
+    appendCommandLog({
+      timestampIso: new Date().toISOString(),
+      processName,
+      action,
+      message: actionProgressLabel(action),
+      accepted: undefined
+    });
+
+    try {
+      const response = await effectiveGateway.sendProcessCommand({ processId, action });
+
+      appendCommandLog({
+        timestampIso: new Date().toISOString(),
+        processName,
+        action,
+        message: response.message,
+        command: response.command,
+        output: response.output,
+        accepted: response.accepted
+      });
+    } catch (error) {
+      appendCommandLog({
+        timestampIso: new Date().toISOString(),
+        processName,
+        action,
+        message: error instanceof Error ? error.message : 'Failed to run process command.',
+        accepted: false
+      });
+    } finally {
+      setPendingActionsByProcessId((previous) => {
+        const next = { ...previous };
+        delete next[processId];
+        return next;
+      });
+      await reload();
+    }
   }
 
   return (
@@ -65,6 +138,7 @@ export function ProcessListPage({ gateway }: ProcessListPageProps) {
               items={state.items}
               selectedProcessId={selectedProcessId}
               onSelect={selectProcess}
+              pendingActionsByProcessId={pendingActionsByProcessId}
               onAction={(processId, nextAction) => {
                 void handleAction(processId, nextAction);
               }}
@@ -76,6 +150,8 @@ export function ProcessListPage({ gateway }: ProcessListPageProps) {
           <ProcessDetailPanel process={selectedProcess} fetchedAtIso={state.fetchedAtIso} />
         </aside>
       </div>
+
+      <ProcessCommandLogBar entries={commandLogEntries} />
     </section>
   );
 }

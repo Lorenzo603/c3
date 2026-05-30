@@ -1,6 +1,6 @@
 .process-page {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   gap: 0.75rem;
   min-height: 100%;
 }
@@ -250,6 +250,92 @@
   color: var(--text-secondary);
   border-top: 1px solid var(--border-soft);
   padding-top: 0.75rem;
+}
+
+.process-log-surface {
+  min-height: 140px;
+  max-height: 260px;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-panel);
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.process-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.process-log-header h3 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.process-log-header span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.process-log-empty {
+  margin: 0;
+  padding: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+}
+
+.process-log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+.process-log-item {
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid #edf2ee;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.process-log-item.failed {
+  background: #fdf5f5;
+}
+
+.process-log-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.process-log-message,
+.process-log-command {
+  margin: 0;
+  font-size: 0.84rem;
+}
+
+.process-log-command {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  color: #355f3f;
+}
+
+.process-log-output {
+  margin: 0;
+  padding: 0.55rem;
+  background: #f7fbf8;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.4rem;
+  white-space: pre-wrap;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  max-height: 110px;
+  overflow: auto;
 }
 
 @media (max-width: 1100px) {

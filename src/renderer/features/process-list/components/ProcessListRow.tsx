@@ -5,6 +5,7 @@ import { StatusBadge } from './StatusBadge';
 export interface ProcessListRowProps {
   process: ProcessSummary;
   isSelected: boolean;
+  pendingAction?: ProcessAction;
   onSelect: (processId: string) => void;
   onAction: (processId: string, action: ProcessAction) => void;
 }
@@ -27,7 +28,9 @@ function ActionButton({
   );
 }
 
-export function ProcessListRow({ process, isSelected, onSelect, onAction }: ProcessListRowProps) {
+export function ProcessListRow({ process, isSelected, pendingAction, onSelect, onAction }: ProcessListRowProps) {
+  const isBusy = Boolean(pendingAction);
+
   return (
     <tr
       className={isSelected ? 'process-row selected' : 'process-row'}
@@ -52,20 +55,20 @@ export function ProcessListRow({ process, isSelected, onSelect, onAction }: Proc
       <td>
         <div className="row-actions" onClick={(event) => event.stopPropagation()}>
           <ActionButton
-            label="Start"
-            disabled={!process.actions.start.enabled}
+            label={pendingAction === 'start' ? 'Starting...' : 'Start'}
+            disabled={isBusy || !process.actions.start.enabled}
             title={process.actions.start.reason}
             onClick={() => onAction(process.id, 'start')}
           />
           <ActionButton
-            label="Stop"
-            disabled={!process.actions.stop.enabled}
+            label={pendingAction === 'stop' ? 'Stopping...' : 'Stop'}
+            disabled={isBusy || !process.actions.stop.enabled}
             title={process.actions.stop.reason}
             onClick={() => onAction(process.id, 'stop')}
           />
           <ActionButton
-            label="Restart"
-            disabled={!process.actions.restart.enabled}
+            label={pendingAction === 'restart' ? 'Restarting...' : 'Restart'}
+            disabled={isBusy || !process.actions.restart.enabled}
             title={process.actions.restart.reason}
             onClick={() => onAction(process.id, 'restart')}
           />

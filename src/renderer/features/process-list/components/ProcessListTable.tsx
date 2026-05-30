@@ -5,6 +5,7 @@ export interface ProcessListTableProps {
   items: ProcessSummary[];
   selectedProcessId: string | null;
   onSelect: (processId: string) => void;
+  pendingActionsByProcessId: Partial<Record<string, ProcessAction>>;
   onAction: (processId: string, action: ProcessAction) => void;
 }
 
@@ -12,6 +13,7 @@ export function ProcessListTable({
   items,
   selectedProcessId,
   onSelect,
+  pendingActionsByProcessId,
   onAction
 }: ProcessListTableProps) {
   return (
@@ -35,6 +37,7 @@ export function ProcessListTable({
               process={item}
               isSelected={item.id === selectedProcessId}
               onSelect={onSelect}
+              pendingAction={pendingActionsByProcessId[item.id]}
               onAction={onAction}
             />
           ))}
