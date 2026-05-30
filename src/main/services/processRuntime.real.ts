@@ -7,15 +7,24 @@ import type {
 } from '../../shared/process';
 import type { ProcessRuntime } from './processRuntime';
 import { filterProcesses } from './processRuntime.fixtures';
-import { buildMonitoredMongoProcess } from './processRuntime.mongodb';
+import {
+  buildMonitoredMongoProcess,
+  buildMonitoredMySqlProcess,
+  buildMonitoredPostgreSqlProcess
+} from './processRuntime.mongodb';
 
 function buildReadOnlyMessage(): string {
   return 'Process control is disabled in real monitoring mode for this milestone.';
 }
 
 async function buildRealProcessList(platform: NodeJS.Platform): Promise<ProcessSummary[]> {
-  const mongoProcess = await buildMonitoredMongoProcess(platform);
-  return [mongoProcess];
+  const [mongoProcess, mySqlProcess, postgreSqlProcess] = await Promise.all([
+    buildMonitoredMongoProcess(platform),
+    buildMonitoredMySqlProcess(platform),
+    buildMonitoredPostgreSqlProcess(platform)
+  ]);
+
+  return [mongoProcess, mySqlProcess, postgreSqlProcess];
 }
 
 export function createRealProcessRuntime(platform: NodeJS.Platform = process.platform): ProcessRuntime {

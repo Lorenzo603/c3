@@ -6,14 +6,25 @@ import type { ProcessSummary } from '../../shared/process';
 const execFileAsync = promisify(execFile);
 
 const MONGODB_LOCAL_PORT = 27017;
+const MYSQL_LOCAL_PORT = 3306;
+const POSTGRESQL_LOCAL_PORT = 5432;
 const MONITORING_TIMEOUT_MS = 500;
 const LOOPBACK_HOSTS = ['127.0.0.1', '::1'];
 
-function monitoredActionCapability() {
+interface MonitoredDatabaseConfig {
+  id: string;
+  name: string;
+  port: number;
+  runningDescription: string;
+  stoppedDescription: string;
+  readOnlyReason: string;
+}
+
+function monitoredActionCapability(reason: string) {
   return {
     supported: false,
     enabled: false,
-    reason: 'MongoDB is monitored only in this milestone; control actions are disabled.'
+    reason
   };
 }
 
@@ -86,28 +97,68 @@ async function readListeningPid(platform: NodeJS.Platform, port: number): Promis
 export async function buildMonitoredMongoProcess(
   platform: NodeJS.Platform = process.platform
 ): Promise<ProcessSummary> {
+  return buildMonitoredDatabaseProcess(platform, {
+    id: 'mongodb-local',
+    name: 'MongoDB Local',
+    port: MONGODB_LOCAL_PORT,
+    runningDescription: 'Local MongoDB instance detected on localhost:27017',
+    stoppedDescription: 'Watching for local MongoDB on localhost:27017',
+    readOnlyReason: 'MongoDB is monitored only in this milestone; control actions are disabled.'
+  });
+}
+
+export async function buildMonitoredMySqlProcess(
+  platform: NodeJS.Platform = process.platform
+): Promise<ProcessSummary> {
+  return buildMonitoredDatabaseProcess(platform, {
+    id: 'mysql-local',
+    name: 'MySQL Local',
+    port: MYSQL_LOCAL_PORT,
+    runningDescription: 'Local MySQL instance detected on localhost:3306',
+    stoppedDescription: 'Watching for local MySQL on localhost:3306',
+    readOnlyReason: 'MySQL is monitored only in this milestone; control actions are disabled.'
+  });
+}
+
+export async function buildMonitoredPostgreSqlProcess(
+  platform: NodeJS.Platform = process.platform
+): Promise<ProcessSummary> {
+  return buildMonitoredDatabaseProcess(platform, {
+    id: 'postgresql-local',
+    name: 'PostgreSQL Local',
+    port: POSTGRESQL_LOCAL_PORT,
+    runningDescription: 'Local PostgreSQL instance detected on localhost:5432',
+    stoppedDescription: 'Watching for local PostgreSQL on localhost:5432',
+    readOnlyReason: 'PostgreSQL is monitored only in this milestone; control actions are disabled.'
+  });
+}
+
+async function buildMonitoredDatabaseProcess(
+  platform: NodeJS.Platform,
+  config: MonitoredDatabaseConfig
+): Promise<ProcessSummary> {
   const [isPortReachable, pid] = await Promise.all([
-    isLocalPortListening(MONGODB_LOCAL_PORT),
-    readListeningPid(platform, MONGODB_LOCAL_PORT)
+    isLocalPortListening(config.port),
+    readListeningPid(platform, config.port)
   ]);
   const isRunning = isPortReachable || pid !== undefined;
 
   return {
-    id: 'mongodb-local',
-    name: 'MongoDB Local',
+    id: config.id,
+    name: config.name,
     source: 'database',
     status: isRunning ? 'running' : 'stopped',
     health: isRunning ? 'healthy' : 'critical',
     pid,
-    ports: [MONGODB_LOCAL_PORT],
+    ports: [config.port],
     description: isRunning
-      ? 'Local MongoDB instance detected on localhost:27017'
-      : 'Watching for local MongoDB on localhost:27017',
+      ? config.runningDescription
+      : config.stoppedDescription,
     lastUpdatedIso: new Date().toISOString(),
     actions: {
-      start: monitoredActionCapability(),
-      stop: monitoredActionCapability(),
-      restart: monitoredActionCapability()
+      start: monitoredActionCapability(config.readOnlyReason),
+      stop: monitoredActionCapability(config.readOnlyReason),
+      restart: monitoredActionCapability(config.readOnlyReason)
     }
   };
 }
