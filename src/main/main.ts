@@ -40,7 +40,7 @@ async function createMainWindow(): Promise<void> {
     height: 840,
     minWidth: 960,
     minHeight: 640,
-    title: 'C3 Desktop',
+    title: 'C3 - Command and Control Cockpit',
     webPreferences: {
       preload: resolvePreloadPath(),
       contextIsolation: true,
