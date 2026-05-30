@@ -57,11 +57,7 @@ export function ProcessListPage({ gateway }: ProcessListPageProps) {
       return 'Starting...';
     }
 
-    if (action === 'stop') {
-      return 'Stopping...';
-    }
-
-    return 'Restarting...';
+    return 'Stopping...';
   }
 
   async function handleAction(processId: string, action: ProcessAction) {

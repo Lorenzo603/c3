@@ -20,8 +20,7 @@ export function buildProcessFixtures(platformLabel: string): ProcessSummary[] {
       lastUpdatedIso: now,
       actions: {
         start: { supported: true, enabled: false, reason: 'Already running' },
-        stop: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' },
-        restart: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' }
+        stop: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' }
       }
     },
     {
@@ -37,8 +36,7 @@ export function buildProcessFixtures(platformLabel: string): ProcessSummary[] {
       lastUpdatedIso: now,
       actions: {
         start: { supported: true, enabled: false, reason: 'Already running' },
-        stop: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' },
-        restart: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' }
+        stop: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' }
       }
     },
     {
@@ -54,8 +52,7 @@ export function buildProcessFixtures(platformLabel: string): ProcessSummary[] {
       lastUpdatedIso: now,
       actions: {
         start: { supported: true, enabled: false, reason: 'Already running' },
-        stop: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' },
-        restart: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' }
+        stop: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' }
       }
     },
     {
@@ -71,8 +68,7 @@ export function buildProcessFixtures(platformLabel: string): ProcessSummary[] {
       lastUpdatedIso: now,
       actions: {
         start: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' },
-        stop: { supported: true, enabled: false, reason: 'Already stopped' },
-        restart: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' }
+        stop: { supported: true, enabled: false, reason: 'Already stopped' }
       }
     },
     {
@@ -88,8 +84,7 @@ export function buildProcessFixtures(platformLabel: string): ProcessSummary[] {
       lastUpdatedIso: now,
       actions: {
         start: { supported: true, enabled: false, reason: 'Currently starting' },
-        stop: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' },
-        restart: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' }
+        stop: { supported: true, enabled: false, reason: 'Control disabled in UI foundation milestone' }
       }
     }
   ];

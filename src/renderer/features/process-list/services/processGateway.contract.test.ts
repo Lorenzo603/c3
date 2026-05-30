@@ -38,7 +38,7 @@ describe('process gateway contracts', () => {
 
     const commandResponse: ProcessCommandResponse = {
       processId: 'p1',
-      action: 'restart',
+      action: 'stop',
       accepted: false,
       message: 'not enabled'
     };
@@ -52,11 +52,11 @@ describe('process gateway contracts', () => {
 
     await expect(gateway.getProcessList()).resolves.toEqual(processListResponse);
     await expect(
-      gateway.sendProcessCommand({ processId: 'p1', action: 'restart' })
+      gateway.sendProcessCommand({ processId: 'p1', action: 'stop' })
     ).resolves.toEqual(commandResponse);
 
     expect(api.getProcessList).toHaveBeenCalledTimes(1);
-    expect(api.sendProcessCommand).toHaveBeenCalledWith({ processId: 'p1', action: 'restart' });
+    expect(api.sendProcessCommand).toHaveBeenCalledWith({ processId: 'p1', action: 'stop' });
   });
 
   it('falls back to fixture gateway when preload API is unavailable', async () => {

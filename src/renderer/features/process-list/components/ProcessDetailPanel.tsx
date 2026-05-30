@@ -42,7 +42,7 @@ export function ProcessDetailPanel({ process, fetchedAtIso }: ProcessDetailPanel
       </dl>
 
       <p className="detail-note">
-        Start/stop/restart actions are intentionally stubbed. The UI already reflects typed control capability fields.
+        Start/stop actions are intentionally stubbed. The UI already reflects typed control capability fields.
       </p>
     </section>
   );

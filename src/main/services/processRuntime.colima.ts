@@ -140,8 +140,7 @@ export async function buildMonitoredColimaProcess(
       lastUpdatedIso: new Date().toISOString(),
       actions: {
         start: readOnlyCapability('Colima control is supported on macOS only.'),
-        stop: readOnlyCapability('Colima control is supported on macOS only.'),
-        restart: readOnlyCapability('Colima control is supported on macOS only.')
+        stop: readOnlyCapability('Colima control is supported on macOS only.')
       }
     };
   }
@@ -160,8 +159,7 @@ export async function buildMonitoredColimaProcess(
       lastUpdatedIso: new Date().toISOString(),
       actions: {
         start: readOnlyCapability('Install Colima and ensure the colima command is on PATH.'),
-        stop: readOnlyCapability('Install Colima and ensure the colima command is on PATH.'),
-        restart: readOnlyCapability('Install Colima and ensure the colima command is on PATH.')
+        stop: readOnlyCapability('Install Colima and ensure the colima command is on PATH.')
       }
     };
   }
@@ -183,10 +181,7 @@ export async function buildMonitoredColimaProcess(
         : enabledCapability('Start Colima'),
       stop: status.running
         ? enabledCapability('Stop Colima')
-        : disabledCapability('Colima is already stopped.'),
-      restart: status.running
-        ? enabledCapability('Restart Colima')
-        : disabledCapability('Start Colima before restarting.')
+        : disabledCapability('Colima is already stopped.')
     }
   };
 }
@@ -248,24 +243,9 @@ export async function runColimaAction(
       };
     }
 
-    if (!status.running) {
-      return {
-        accepted: false,
-        message: 'Colima is stopped. Start it before restarting.'
-      };
-    }
-
-    const stopResult = await runColima(['stop']);
-    const startResult = await runColima(['start']);
-    const combinedOutput = [stopResult.output, startResult.output]
-      .filter((chunk) => typeof chunk === 'string' && chunk.length > 0)
-      .join('\n\n');
-
     return {
-      accepted: true,
-      message: 'Colima restarted successfully.',
-      command: `${stopResult.command} && ${startResult.command}`,
-      output: combinedOutput.length > 0 ? combinedOutput : undefined
+      accepted: false,
+      message: `Unsupported Colima action: ${action}`
     };
   } catch (error) {
     const details = errorOutput(error);

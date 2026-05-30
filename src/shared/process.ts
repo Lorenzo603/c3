@@ -15,7 +15,7 @@ export type ProcessSource = 'native' | 'docker' | 'database' | 'custom';
 
 export type ProcessHealth = 'healthy' | 'warning' | 'critical' | 'unknown';
 
-export type ProcessAction = 'start' | 'stop' | 'restart';
+export type ProcessAction = 'start' | 'stop';
 
 export interface ActionCapability {
   supported: boolean;
@@ -26,7 +26,6 @@ export interface ActionCapability {
 export interface ProcessActionCapabilities {
   start: ActionCapability;
   stop: ActionCapability;
-  restart: ActionCapability;
 }
 
 export interface ProcessSummary {

@@ -157,8 +157,7 @@ async function buildMonitoredDatabaseProcess(
     lastUpdatedIso: new Date().toISOString(),
     actions: {
       start: monitoredActionCapability(config.readOnlyReason),
-      stop: monitoredActionCapability(config.readOnlyReason),
-      restart: monitoredActionCapability(config.readOnlyReason)
+      stop: monitoredActionCapability(config.readOnlyReason)
     }
   };
 }

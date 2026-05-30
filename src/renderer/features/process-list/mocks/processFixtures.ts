@@ -16,8 +16,7 @@ export const processFixtures: ProcessSummary[] = [
     lastUpdatedIso: now,
     actions: {
       start: { supported: true, enabled: false, reason: 'Already running' },
-      stop: { supported: true, enabled: false, reason: 'Control disabled in this milestone' },
-      restart: { supported: true, enabled: false, reason: 'Control disabled in this milestone' }
+      stop: { supported: true, enabled: false, reason: 'Control disabled in this milestone' }
     }
   },
   {
@@ -33,8 +32,7 @@ export const processFixtures: ProcessSummary[] = [
     lastUpdatedIso: now,
     actions: {
       start: { supported: true, enabled: false, reason: 'Already running' },
-      stop: { supported: true, enabled: false, reason: 'Control disabled in this milestone' },
-      restart: { supported: true, enabled: false, reason: 'Control disabled in this milestone' }
+      stop: { supported: true, enabled: false, reason: 'Control disabled in this milestone' }
     }
   },
   {
@@ -50,8 +48,7 @@ export const processFixtures: ProcessSummary[] = [
     lastUpdatedIso: now,
     actions: {
       start: { supported: true, enabled: false, reason: 'Already running' },
-      stop: { supported: true, enabled: false, reason: 'Control disabled in this milestone' },
-      restart: { supported: true, enabled: false, reason: 'Control disabled in this milestone' }
+      stop: { supported: true, enabled: false, reason: 'Control disabled in this milestone' }
     }
   },
   {
@@ -67,8 +64,7 @@ export const processFixtures: ProcessSummary[] = [
     lastUpdatedIso: now,
     actions: {
       start: { supported: true, enabled: false, reason: 'Control disabled in this milestone' },
-      stop: { supported: true, enabled: false, reason: 'Already stopped' },
-      restart: { supported: true, enabled: false, reason: 'Control disabled in this milestone' }
+      stop: { supported: true, enabled: false, reason: 'Already stopped' }
     }
   },
   {
@@ -91,11 +87,6 @@ export const processFixtures: ProcessSummary[] = [
         supported: false,
         enabled: false,
         reason: 'MongoDB monitoring is read-only in this milestone'
-      },
-      restart: {
-        supported: false,
-        enabled: false,
-        reason: 'MongoDB monitoring is read-only in this milestone'
       }
     }
   },
@@ -112,8 +103,7 @@ export const processFixtures: ProcessSummary[] = [
     lastUpdatedIso: now,
     actions: {
       start: { supported: true, enabled: false, reason: 'Currently starting' },
-      stop: { supported: true, enabled: false, reason: 'Control disabled in this milestone' },
-      restart: { supported: true, enabled: false, reason: 'Control disabled in this milestone' }
+      stop: { supported: true, enabled: false, reason: 'Control disabled in this milestone' }
     }
   }
 ];

@@ -66,12 +66,6 @@ export function ProcessListRow({ process, isSelected, pendingAction, onSelect, o
             title={process.actions.stop.reason}
             onClick={() => onAction(process.id, 'stop')}
           />
-          <ActionButton
-            label={pendingAction === 'restart' ? 'Restarting...' : 'Restart'}
-            disabled={isBusy || !process.actions.restart.enabled}
-            title={process.actions.restart.reason}
-            onClick={() => onAction(process.id, 'restart')}
-          />
         </div>
       </td>
     </tr>

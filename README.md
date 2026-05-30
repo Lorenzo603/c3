@@ -11,7 +11,7 @@ This milestone intentionally focuses on shell architecture, typed contracts, and
 - Feature-oriented renderer shell centered on a process list dashboard.
 - Process list states: loading, populated, empty, error.
 - Row selection and detail panel placeholder.
-- Action affordances (start/stop/restart) modeled and displayed, currently stubbed.
+- Action affordances (start/stop) modeled and displayed, currently stubbed.
 - Platform runtime seam in main for macOS/Windows future divergence.
 - Typecheck, build, UI tests, and packaging smoke setup.
 
@@ -45,7 +45,7 @@ The shared process model in src/shared/process.ts currently includes:
 - status: running, stopped, starting, stopping, degraded, unknown.
 - health: healthy, warning, critical, unknown.
 - pid and ports when available.
-- action capabilities per process for start/stop/restart.
+- action capabilities per process for start/stop.
 - typed IPC payloads:
 	- getProcessList(request?: GetProcessListRequest)
 	- sendProcessCommand(request: ProcessCommandRequest)
@@ -104,7 +104,7 @@ Enable test mode with either C3_TEST_MODE=1 or the --test-mode runtime flag.
 ## Out Of Scope For This Milestone
 
 - Real process enumeration.
-- Real start/stop/restart behavior.
+- Real start/stop behavior.
 - Docker integration and database health probes.
 - Tray integration, notifications, autostart, and production packaging hardening.
 

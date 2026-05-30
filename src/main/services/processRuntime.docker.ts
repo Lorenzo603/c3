@@ -167,10 +167,6 @@ function findProcessConfigById(processId: string): DockerProcessConfig | undefin
   return DOCKER_PROCESS_CONFIGS.find((config) => config.id === processId);
 }
 
-function isSupportedDockerAction(action: ProcessAction): action is 'start' | 'stop' {
-  return action === 'start' || action === 'stop';
-}
-
 function buildDockerOutput(stdout: string, stderr: string): string | undefined {
   const output = `${stdout}\n${stderr}`.trim();
   return output.length > 0 ? output : undefined;
@@ -212,8 +208,7 @@ function buildDockerProcessSummary(
       lastUpdatedIso: new Date().toISOString(),
       actions: {
         start: unsupportedActionCapability(DOCKER_UNAVAILABLE_REASON),
-        stop: unsupportedActionCapability(DOCKER_UNAVAILABLE_REASON),
-        restart: unsupportedActionCapability('Restart is not enabled for Docker monitors.')
+        stop: unsupportedActionCapability(DOCKER_UNAVAILABLE_REASON)
       }
     };
   }
@@ -245,8 +240,7 @@ function buildDockerProcessSummary(
         ? unsupportedActionCapability(`No Docker container found exposing port ${config.port}.`)
         : isRunning
           ? enabledActionCapability('Stop container')
-          : disabledActionCapability('Container is already stopped.'),
-      restart: unsupportedActionCapability('Restart is not enabled for Docker monitors.')
+          : disabledActionCapability('Container is already stopped.')
     }
   };
 }
@@ -262,13 +256,6 @@ export function isDockerProcessId(processId: string): processId is typeof DOCKER
 }
 
 export async function runDockerProcessAction(processId: string, action: ProcessAction): Promise<DockerCommandResult> {
-  if (!isSupportedDockerAction(action)) {
-    return {
-      accepted: false,
-      message: 'Only start and stop are enabled for Docker monitors.'
-    };
-  }
-
   const config = findProcessConfigById(processId);
 
   if (!config) {

@@ -47,11 +47,6 @@ function buildControllableProcess(): ProcessSummary {
         supported: true,
         enabled: false,
         reason: 'Already stopped'
-      },
-      restart: {
-        supported: true,
-        enabled: false,
-        reason: 'Start Colima before restarting'
       }
     }
   };
