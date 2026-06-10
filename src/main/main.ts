@@ -65,7 +65,7 @@ function resolvePreloadPath(): string {
 
 async function createMainWindow(): Promise<void> {
   mainWindow = new BrowserWindow({
-    width: 1320,
+    width: 1420,
     height: 840,
     minWidth: 960,
     minHeight: 640,
