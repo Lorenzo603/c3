@@ -73,18 +73,61 @@ const OPEN_BRUNO_CRM_APPS_SCRIPT = `tell application "iTerm2"
   end tell
 end tell`;
 
-function createShortcutCommandString(shortcutId: ShortcutId): string {
-  if (shortcutId === 'open-bruno-crmapps') {
-    return `osascript -e '${OPEN_BRUNO_CRM_APPS_SCRIPT}'`;
-  }
+interface ShortcutExecutionPlan {
+  command: string;
+  args: string[];
+  commandPreview: string;
+  successMessage: string;
+  requiresMacOs?: boolean;
+}
 
-  return 'osascript -e <shortcut-script>';
+function resolveShortcutExecutionPlan(shortcutId: ShortcutId): ShortcutExecutionPlan | undefined {
+  switch (shortcutId) {
+    case 'open-bruno-crmapps':
+      return {
+        command: 'osascript',
+        args: ['-e', OPEN_BRUNO_CRM_APPS_SCRIPT],
+        commandPreview: `osascript -e '${OPEN_BRUNO_CRM_APPS_SCRIPT}'`,
+        successMessage: 'Shortcut launched in iTerm2.',
+        requiresMacOs: true
+      };
+    case 'open-vscode-lxitcrm':
+      return {
+        command: 'zsh',
+        args: ['-lc', 'code ~/p/gitlab/lxitcrm'],
+        commandPreview: 'code ~/p/gitlab/lxitcrm',
+        successMessage: 'VS Code opened for ~/p/gitlab/lxitcrm.'
+      };
+    case 'open-vscode-crmsapp':
+      return {
+        command: 'zsh',
+        args: ['-lc', 'code ~/p/gitlab/lxitcrm/crmsapp'],
+        commandPreview: 'code ~/p/gitlab/lxitcrm/crmsapp',
+        successMessage: 'VS Code opened for ~/p/gitlab/lxitcrm/crmsapp.'
+      };
+    case 'open-vscode-one-cst':
+      return {
+        command: 'zsh',
+        args: ['-lc', 'code ~/p/gitlab/lxitcrm/one-cst'],
+        commandPreview: 'code ~/p/gitlab/lxitcrm/one-cst',
+        successMessage: 'VS Code opened for ~/p/gitlab/lxitcrm/one-cst.'
+      };
+    default:
+      return undefined;
+  }
+}
+
+function createShortcutCommandString(shortcutId: ShortcutId): string {
+  const executionPlan = resolveShortcutExecutionPlan(shortcutId);
+  return executionPlan?.commandPreview ?? 'shortcut command unavailable';
 }
 
 async function launchShortcut(request: LaunchShortcutRequest): Promise<LaunchShortcutResponse> {
   const { shortcutId } = request;
 
-  if (shortcutId !== 'open-bruno-crmapps') {
+  const executionPlan = resolveShortcutExecutionPlan(shortcutId);
+
+  if (!executionPlan) {
     return {
       shortcutId,
       accepted: false,
@@ -92,23 +135,23 @@ async function launchShortcut(request: LaunchShortcutRequest): Promise<LaunchSho
     };
   }
 
-  if (process.platform !== 'darwin') {
+  if (executionPlan.requiresMacOs && process.platform !== 'darwin') {
     return {
       shortcutId,
       accepted: false,
       message: 'Shortcuts are currently supported on macOS only.',
-      command: createShortcutCommandString(shortcutId)
+      command: executionPlan.commandPreview
     };
   }
 
   return new Promise((resolve) => {
-    execFile('osascript', ['-e', OPEN_BRUNO_CRM_APPS_SCRIPT], (error, stdout, stderr) => {
+    execFile(executionPlan.command, executionPlan.args, (error, stdout, stderr) => {
       if (error) {
         resolve({
           shortcutId,
           accepted: false,
           message: `Failed to launch shortcut: ${error.message}`,
-          command: createShortcutCommandString(shortcutId),
+          command: executionPlan.commandPreview,
           output: stderr.trim() || stdout.trim() || undefined
         });
         return;
@@ -117,8 +160,8 @@ async function launchShortcut(request: LaunchShortcutRequest): Promise<LaunchSho
       resolve({
         shortcutId,
         accepted: true,
-        message: 'Shortcut launched in iTerm2.',
-        command: createShortcutCommandString(shortcutId),
+        message: executionPlan.successMessage,
+        command: executionPlan.commandPreview,
         output: stdout.trim() || undefined
       });
     });

@@ -40,4 +40,30 @@ describe('ShortcutsPage', () => {
       expect(screen.getByText('Shortcut launched in iTerm2.')).toBeInTheDocument();
     });
   });
+
+  it('launches lxitcrm VS Code shortcut', async () => {
+    const launchShortcutSpy = vi
+      .fn<ShortcutsGateway['launchShortcut']>()
+      .mockResolvedValue({
+        shortcutId: 'open-vscode-lxitcrm',
+        accepted: true,
+        message: 'VS Code opened for ~/p/gitlab/lxitcrm.'
+      });
+
+    const gateway = createGateway({ launchShortcut: launchShortcutSpy });
+
+    render(<ShortcutsPage gateway={gateway} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open VS Code: lxitcrm' }));
+
+    await waitFor(() => {
+      expect(launchShortcutSpy).toHaveBeenCalledWith({
+        shortcutId: 'open-vscode-lxitcrm'
+      });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('VS Code opened for ~/p/gitlab/lxitcrm.')).toBeInTheDocument();
+    });
+  });
 });

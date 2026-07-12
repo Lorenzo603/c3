@@ -6,7 +6,11 @@ export const IPC_CHANNELS = {
   launchShortcut: 'c3:launch-shortcut'
 } as const;
 
-export type ShortcutId = 'open-bruno-crmapps';
+export type ShortcutId =
+  | 'open-bruno-crmapps'
+  | 'open-vscode-lxitcrm'
+  | 'open-vscode-crmsapp'
+  | 'open-vscode-one-cst';
 
 export type ProcessStatus =
   | 'running'
