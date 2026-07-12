@@ -1,12 +1,16 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
+import { execFile } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   IPC_CHANNELS,
   type FindProcessByPortRequest,
   type GetProcessListRequest,
+  type LaunchShortcutRequest,
+  type LaunchShortcutResponse,
   type KillProcessRequest,
-  type ProcessCommandRequest
+  type ProcessCommandRequest,
+  type ShortcutId
 } from '../shared/process';
 import { createProcessRuntime } from './services/processRuntime';
 import {
@@ -51,6 +55,75 @@ function resolveRuntimeMode() {
 }
 
 const runtime = createProcessRuntime({ mode: resolveRuntimeMode() });
+
+const OPEN_BRUNO_CRM_APPS_SCRIPT = `tell application "iTerm2"
+  activate
+
+  if (count of windows) = 0 then
+    create window with default profile
+  else
+    tell current window
+      create tab with default profile
+    end tell
+  end if
+
+  tell current session of current window
+    set name to "New Tab"
+    write text "cd ~/p/gitlab/lxitcrm/crm-microservices/api-bruno-crmapps; code ."
+  end tell
+end tell`;
+
+function createShortcutCommandString(shortcutId: ShortcutId): string {
+  if (shortcutId === 'open-bruno-crmapps') {
+    return `osascript -e '${OPEN_BRUNO_CRM_APPS_SCRIPT}'`;
+  }
+
+  return 'osascript -e <shortcut-script>';
+}
+
+async function launchShortcut(request: LaunchShortcutRequest): Promise<LaunchShortcutResponse> {
+  const { shortcutId } = request;
+
+  if (shortcutId !== 'open-bruno-crmapps') {
+    return {
+      shortcutId,
+      accepted: false,
+      message: `Unknown shortcut id: ${shortcutId}.`
+    };
+  }
+
+  if (process.platform !== 'darwin') {
+    return {
+      shortcutId,
+      accepted: false,
+      message: 'Shortcuts are currently supported on macOS only.',
+      command: createShortcutCommandString(shortcutId)
+    };
+  }
+
+  return new Promise((resolve) => {
+    execFile('osascript', ['-e', OPEN_BRUNO_CRM_APPS_SCRIPT], (error, stdout, stderr) => {
+      if (error) {
+        resolve({
+          shortcutId,
+          accepted: false,
+          message: `Failed to launch shortcut: ${error.message}`,
+          command: createShortcutCommandString(shortcutId),
+          output: stderr.trim() || stdout.trim() || undefined
+        });
+        return;
+      }
+
+      resolve({
+        shortcutId,
+        accepted: true,
+        message: 'Shortcut launched in iTerm2.',
+        command: createShortcutCommandString(shortcutId),
+        output: stdout.trim() || undefined
+      });
+    });
+  });
+}
 
 function resolvePreloadPath(): string {
   const defaultPath = join(__dirname, '../preload/index.mjs');
@@ -110,6 +183,11 @@ function registerIpcHandlers(): void {
   ipcMain.handle(
     IPC_CHANNELS.killProcess,
     async (_event, request: KillProcessRequest) => killProcessByPid(request)
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.launchShortcut,
+    async (_event, request: LaunchShortcutRequest) => launchShortcut(request)
   );
 }
 

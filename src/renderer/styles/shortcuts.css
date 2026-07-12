@@ -1,0 +1,53 @@
+.shortcuts-page {
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+}
+
+.shortcuts-surface {
+  border: 1px solid var(--border-soft);
+  border-radius: 0.75rem;
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-panel);
+  padding: 1rem;
+}
+
+.shortcuts-surface h2 {
+  margin: 0;
+}
+
+.shortcuts-subtitle {
+  margin-top: 0.45rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.shortcuts-button-list {
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.shortcuts-action-button {
+  border: 1px solid var(--border-soft);
+  border-radius: 0.5rem;
+  background: var(--brand);
+  color: #fff;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shortcuts-action-button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.shortcuts-message {
+  margin-top: 0.7rem;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}

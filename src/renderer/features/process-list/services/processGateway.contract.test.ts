@@ -55,6 +55,11 @@ describe('process gateway contracts', () => {
         pid: 1,
         accepted: false,
         message: 'not enabled'
+      }),
+      launchShortcut: vi.fn().mockResolvedValue({
+        shortcutId: 'open-bruno-crmapps',
+        accepted: false,
+        message: 'not enabled'
       })
     };
 

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { ProcessListPage } from '../features/process-list/ProcessListPage';
 import { ProcessKillPage } from '../features/process-kill/ProcessKillPage';
+import { ShortcutsPage } from '../features/shortcuts/ShortcutsPage';
 
-type AppPageId = 'process-monitoring' | 'process-kill';
+type AppPageId = 'process-monitoring' | 'process-kill' | 'shortcuts';
 
 interface AppPage {
   id: AppPageId;
@@ -10,7 +11,7 @@ interface AppPage {
   description: string;
 }
 
-const APP_PAGE_ORDER: AppPageId[] = ['process-monitoring', 'process-kill'];
+const APP_PAGE_ORDER: AppPageId[] = ['process-monitoring', 'process-kill', 'shortcuts'];
 
 const APP_PAGES: Record<AppPageId, AppPage> = {
   'process-monitoring': {
@@ -22,6 +23,11 @@ const APP_PAGES: Record<AppPageId, AppPage> = {
     id: 'process-kill',
     label: 'Process Kill',
     description: 'Dedicated workflow area for kill actions.'
+  },
+  shortcuts: {
+    id: 'shortcuts',
+    label: 'Shortcuts',
+    description: 'Launch common workspace actions from one place.'
   }
 };
 
@@ -70,8 +76,10 @@ export function App() {
         <main className="app-main">
           {activePage.id === 'process-monitoring' ? (
             <ProcessListPage />
-          ) : (
+          ) : activePage.id === 'process-kill' ? (
             <ProcessKillPage />
+          ) : (
+            <ShortcutsPage />
           )}
         </main>
       </div>

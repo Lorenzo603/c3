@@ -2,8 +2,11 @@ export const IPC_CHANNELS = {
   getProcessList: 'c3:get-process-list',
   processCommand: 'c3:process-command',
   findProcessByPort: 'c3:find-process-by-port',
-  killProcess: 'c3:kill-process'
+  killProcess: 'c3:kill-process',
+  launchShortcut: 'c3:launch-shortcut'
 } as const;
+
+export type ShortcutId = 'open-bruno-crmapps';
 
 export type ProcessStatus =
   | 'running'
@@ -106,9 +109,22 @@ export interface KillProcessResponse {
   command?: string;
 }
 
+export interface LaunchShortcutRequest {
+  shortcutId: ShortcutId;
+}
+
+export interface LaunchShortcutResponse {
+  shortcutId: ShortcutId;
+  accepted: boolean;
+  message: string;
+  command?: string;
+  output?: string;
+}
+
 export interface C3DesktopApi {
   getProcessList(request?: GetProcessListRequest): Promise<GetProcessListResponse>;
   sendProcessCommand(request: ProcessCommandRequest): Promise<ProcessCommandResponse>;
   findProcessByPort(request: FindProcessByPortRequest): Promise<FindProcessByPortResponse>;
   killProcess(request: KillProcessRequest): Promise<KillProcessResponse>;
+  launchShortcut(request: LaunchShortcutRequest): Promise<LaunchShortcutResponse>;
 }

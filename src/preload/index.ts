@@ -4,6 +4,7 @@ import {
   type C3DesktopApi,
   type FindProcessByPortRequest,
   type GetProcessListRequest,
+  type LaunchShortcutRequest,
   type KillProcessRequest,
   type ProcessCommandRequest
 } from '../shared/process';
@@ -20,6 +21,9 @@ const api: C3DesktopApi = {
   },
   killProcess(request: KillProcessRequest) {
     return ipcRenderer.invoke(IPC_CHANNELS.killProcess, request);
+  },
+  launchShortcut(request: LaunchShortcutRequest) {
+    return ipcRenderer.invoke(IPC_CHANNELS.launchShortcut, request);
   }
 };
 
