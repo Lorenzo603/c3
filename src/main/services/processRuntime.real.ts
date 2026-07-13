@@ -18,8 +18,7 @@ import {
 } from './processRuntime.docker';
 import { filterProcesses } from './processRuntime.fixtures';
 import {
-  buildMonitoredMongoProcess,
-  buildMonitoredMySqlProcess
+  buildMonitoredMongoProcess
 } from './processRuntime.database';
 import {
   buildMonitoredCloudSqlProxyConnectionsProcess,
@@ -32,14 +31,13 @@ function buildReadOnlyMessage(): string {
 }
 
 async function buildRealProcessList(platform: NodeJS.Platform): Promise<ProcessSummary[]> {
-  const [mongoProcess, mySqlProcess, dockerDatabaseProcesses, cloudSqlProxyScriptProcess] = await Promise.all([
+  const [mongoProcess, dockerDatabaseProcesses, cloudSqlProxyScriptProcess] = await Promise.all([
     buildMonitoredMongoProcess(platform),
-    buildMonitoredMySqlProcess(platform),
     buildMonitoredDockerProcesses(),
     buildMonitoredCloudSqlProxyConnectionsProcess(platform)
   ]);
 
-  const baseProcesses = [cloudSqlProxyScriptProcess, mongoProcess, mySqlProcess, ...dockerDatabaseProcesses];
+  const baseProcesses = [cloudSqlProxyScriptProcess, mongoProcess, ...dockerDatabaseProcesses];
 
   if (platform !== 'darwin') {
     return baseProcesses;

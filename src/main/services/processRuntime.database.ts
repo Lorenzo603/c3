@@ -6,8 +6,6 @@ import type { ProcessSummary } from '../../shared/process';
 const execFileAsync = promisify(execFile);
 
 const MONGODB_LOCAL_PORT = 27017;
-const MYSQL_LOCAL_PORT = 3306;
-const POSTGRESQL_LOCAL_PORT = 5432;
 const MONITORING_TIMEOUT_MS = 500;
 const LOOPBACK_HOSTS = ['127.0.0.1', '::1'];
 
@@ -106,20 +104,6 @@ export async function buildMonitoredMongoProcess(
     runningDescription: 'Local MongoDB instance detected on localhost:27017',
     stoppedDescription: 'Watching for local MongoDB on localhost:27017',
     readOnlyReason: 'MongoDB is monitored only in this milestone; control actions are disabled.'
-  });
-}
-
-export async function buildMonitoredMySqlProcess(
-  platform: NodeJS.Platform = process.platform
-): Promise<ProcessSummary> {
-  return buildMonitoredDatabaseProcess(platform, {
-    id: 'mysql-local',
-    name: 'MySQL Local',
-    logoPath: '/process-logos/mysql.svg',
-    port: MYSQL_LOCAL_PORT,
-    runningDescription: 'Local MySQL instance detected on localhost:3306',
-    stoppedDescription: 'Watching for local MySQL on localhost:3306',
-    readOnlyReason: 'MySQL is monitored only in this milestone; control actions are disabled.'
   });
 }
 

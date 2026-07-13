@@ -187,6 +187,32 @@ describe('docker process monitoring', () => {
     expect(redis.description).toContain('redis-cache');
   });
 
+  it('detects MySQL running and enables stop', async () => {
+    mockDockerPs([
+      {
+        ID: 'my001',
+        Names: 'mysql-db',
+        Image: 'mysql:8.4',
+        Ports: '0.0.0.0:3306->3306/tcp',
+        Status: 'Up 3 minutes'
+      }
+    ]);
+
+    const { buildMonitoredDockerProcesses } = await importDockerRuntime();
+
+    const items = await buildMonitoredDockerProcesses();
+    const mysql = findProcessById(items, 'docker-mysql');
+
+    expect(mysql).toMatchObject({
+      status: 'running',
+      health: 'healthy',
+      ports: [3306]
+    });
+    expect(mysql.actions.start.enabled).toBe(false);
+    expect(mysql.actions.stop.enabled).toBe(true);
+    expect(mysql.description).toContain('mysql-db');
+  });
+
   it('detects Qdrant on ports 6333 and 6334', async () => {
     mockDockerPs([
       {
@@ -356,5 +382,41 @@ describe('docker process monitoring', () => {
     expect(result.command).toBe('docker start qd001');
     expect(result.message).toMatch(/started successfully/i);
     expect(result.output).toContain('qd001');
+  });
+
+  it('stops a running MySQL container', async () => {
+    mockDockerExec((dockerArgs) => {
+      if (dockerArgs[0] === 'ps' && dockerArgs.includes('-a')) {
+        return {
+          stdout: JSON.stringify({
+            ID: 'my001',
+            Names: 'mysql-db',
+            Image: 'mysql:8.4',
+            Ports: '0.0.0.0:3306->3306/tcp',
+            Status: 'Up 10 minutes'
+          }),
+          stderr: ''
+        };
+      }
+
+      if (dockerArgs[0] === 'stop' && dockerArgs[1] === 'my001') {
+        return {
+          stdout: 'my001',
+          stderr: ''
+        };
+      }
+
+      return {
+        error: new Error(`unexpected docker args: ${dockerArgs.join(' ')}`)
+      };
+    });
+
+    const { runDockerProcessAction } = await importDockerRuntime();
+    const result = await runDockerProcessAction('docker-mysql', 'stop');
+
+    expect(result.accepted).toBe(true);
+    expect(result.command).toBe('docker stop my001');
+    expect(result.message).toMatch(/stopped successfully/i);
+    expect(result.output).toContain('my001');
   });
 });
