@@ -108,6 +108,11 @@ Artifacts are written to the release directory, including:
 3. If Electron binary is missing on first run, execute npx electron --version once and retry npm run dev.
 4. For fixture-only mode, run npm run dev:test.
 
+# MySQL Docker command:
+```
+docker run --name mysql -p 3306:3306 -v ~/local-app-data/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -d mysql:8 
+```
+
 ## Verification Status (Current)
 
 - Dev startup path builds main/preload/renderer and launches Electron.
