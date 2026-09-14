@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { ProcessListPage } from '../features/process-list/ProcessListPage';
 import { ProcessKillPage } from '../features/process-kill/ProcessKillPage';
 import { ShortcutsPage } from '../features/shortcuts/ShortcutsPage';
+import { FastUtilsPage } from '../features/fast-utils/FastUtilsPage';
 
-type AppPageId = 'process-monitoring' | 'process-kill' | 'shortcuts';
+type AppPageId = 'process-monitoring' | 'process-kill' | 'shortcuts' | 'fast-utils';
 
 interface AppPage {
   id: AppPageId;
@@ -11,7 +12,7 @@ interface AppPage {
   description: string;
 }
 
-const APP_PAGE_ORDER: AppPageId[] = ['process-monitoring', 'process-kill', 'shortcuts'];
+const APP_PAGE_ORDER: AppPageId[] = ['process-monitoring', 'process-kill', 'shortcuts', 'fast-utils'];
 
 const APP_PAGES: Record<AppPageId, AppPage> = {
   'process-monitoring': {
@@ -28,6 +29,11 @@ const APP_PAGES: Record<AppPageId, AppPage> = {
     id: 'shortcuts',
     label: 'Shortcuts',
     description: 'Launch common workspace actions from one place.'
+  },
+  'fast-utils': {
+    id: 'fast-utils',
+    label: 'Fast Utils',
+    description: 'Quick utilities for common transformations.'
   }
 };
 
@@ -78,8 +84,10 @@ export function App() {
             <ProcessListPage />
           ) : activePage.id === 'process-kill' ? (
             <ProcessKillPage />
-          ) : (
+          ) : activePage.id === 'shortcuts' ? (
             <ShortcutsPage />
+          ) : (
+            <FastUtilsPage />
           )}
         </main>
       </div>
