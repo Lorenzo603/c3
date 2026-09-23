@@ -213,6 +213,32 @@ describe('docker process monitoring', () => {
     expect(mysql.description).toContain('mysql-db');
   });
 
+  it('detects MongoDB 8.3.11 running and enables stop', async () => {
+    mockDockerPs([
+      {
+        ID: 'mg001',
+        Names: 'mongodb-db',
+        Image: 'mongodb/mongodb-community-server:8.3.11-ubuntu2204',
+        Ports: '0.0.0.0:27017->27017/tcp',
+        Status: 'Up 6 minutes'
+      }
+    ]);
+
+    const { buildMonitoredDockerProcesses } = await importDockerRuntime();
+
+    const items = await buildMonitoredDockerProcesses();
+    const mongodb = findProcessById(items, 'docker-mongodb-8-3-11');
+
+    expect(mongodb).toMatchObject({
+      status: 'running',
+      health: 'healthy',
+      ports: [27017]
+    });
+    expect(mongodb.actions.start.enabled).toBe(false);
+    expect(mongodb.actions.stop.enabled).toBe(true);
+    expect(mongodb.description).toContain('mongodb-db');
+  });
+
   it('detects Qdrant on ports 6333 and 6334', async () => {
     mockDockerPs([
       {
@@ -418,5 +444,41 @@ describe('docker process monitoring', () => {
     expect(result.command).toBe('docker stop my001');
     expect(result.message).toMatch(/stopped successfully/i);
     expect(result.output).toContain('my001');
+  });
+
+  it('stops a running MongoDB 8.3.11 container', async () => {
+    mockDockerExec((dockerArgs) => {
+      if (dockerArgs[0] === 'ps' && dockerArgs.includes('-a')) {
+        return {
+          stdout: JSON.stringify({
+            ID: 'mg001',
+            Names: 'mongodb-db',
+            Image: 'mongodb/mongodb-community-server:8.3.11-ubuntu2204',
+            Ports: '0.0.0.0:27017->27017/tcp',
+            Status: 'Up 9 minutes'
+          }),
+          stderr: ''
+        };
+      }
+
+      if (dockerArgs[0] === 'stop' && dockerArgs[1] === 'mg001') {
+        return {
+          stdout: 'mg001',
+          stderr: ''
+        };
+      }
+
+      return {
+        error: new Error(`unexpected docker args: ${dockerArgs.join(' ')}`)
+      };
+    });
+
+    const { runDockerProcessAction } = await importDockerRuntime();
+    const result = await runDockerProcessAction('docker-mongodb-8-3-11', 'stop');
+
+    expect(result.accepted).toBe(true);
+    expect(result.command).toBe('docker stop mg001');
+    expect(result.message).toMatch(/stopped successfully/i);
+    expect(result.output).toContain('mg001');
   });
 });

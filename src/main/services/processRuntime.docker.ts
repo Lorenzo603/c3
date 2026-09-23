@@ -6,6 +6,7 @@ const execFileAsync = promisify(execFile);
 
 const POSTGRES_DOCKER_PORT = 5432;
 const MYSQL_DOCKER_PORT = 3306;
+const MONGODB_DOCKER_PORT = 27017;
 const REDIS_DOCKER_PORT = 6379;
 const QDRANT_DOCKER_HTTP_PORT = 6333;
 const QDRANT_DOCKER_GRPC_PORT = 6334;
@@ -14,6 +15,7 @@ const DOCKER_UNAVAILABLE_REASON = 'Colima not started';
 
 export const DOCKER_POSTGRES_PROCESS_ID = 'docker-postgres';
 export const DOCKER_MYSQL_PROCESS_ID = 'docker-mysql';
+export const DOCKER_MONGODB_8_3_11_PROCESS_ID = 'docker-mongodb-8-3-11';
 export const DOCKER_REDIS_PROCESS_ID = 'docker-redis';
 export const DOCKER_QDRANT_PROCESS_ID = 'docker-qdrant';
 
@@ -21,6 +23,7 @@ interface DockerProcessConfig {
   id:
     | typeof DOCKER_POSTGRES_PROCESS_ID
     | typeof DOCKER_MYSQL_PROCESS_ID
+    | typeof DOCKER_MONGODB_8_3_11_PROCESS_ID
     | typeof DOCKER_REDIS_PROCESS_ID
     | typeof DOCKER_QDRANT_PROCESS_ID;
   name: string;
@@ -43,6 +46,13 @@ const DOCKER_PROCESS_CONFIGS: DockerProcessConfig[] = [
     logoPath: '/process-logos/mysql.svg',
     ports: [MYSQL_DOCKER_PORT],
     matchHints: ['mysql', 'mariadb']
+  },
+  {
+    id: DOCKER_MONGODB_8_3_11_PROCESS_ID,
+    name: 'MongoDB 8.3.11 (Docker)',
+    logoPath: '/process-logos/mongodb.svg',
+    ports: [MONGODB_DOCKER_PORT],
+    matchHints: ['mongo', 'mongodb', 'mongodb-community-server']
   },
   {
     id: DOCKER_REDIS_PROCESS_ID,
@@ -298,10 +308,11 @@ export async function buildMonitoredDockerProcesses(): Promise<ProcessSummary[]>
 
 export function isDockerProcessId(
   processId: string
-): processId is typeof DOCKER_POSTGRES_PROCESS_ID | typeof DOCKER_MYSQL_PROCESS_ID | typeof DOCKER_REDIS_PROCESS_ID | typeof DOCKER_QDRANT_PROCESS_ID {
+): processId is typeof DOCKER_POSTGRES_PROCESS_ID | typeof DOCKER_MYSQL_PROCESS_ID | typeof DOCKER_MONGODB_8_3_11_PROCESS_ID | typeof DOCKER_REDIS_PROCESS_ID | typeof DOCKER_QDRANT_PROCESS_ID {
   return (
     processId === DOCKER_POSTGRES_PROCESS_ID
     || processId === DOCKER_MYSQL_PROCESS_ID
+    || processId === DOCKER_MONGODB_8_3_11_PROCESS_ID
     || processId === DOCKER_REDIS_PROCESS_ID
     || processId === DOCKER_QDRANT_PROCESS_ID
   );
