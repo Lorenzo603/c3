@@ -115,7 +115,7 @@ docker run --name mysql -p 3306:3306 -v ~/local-app-data/mysql:/var/lib/mysql -e
 
 # MongoDB 8.3.11 Docker command:
 ```
-docker run --name mongodb-8.3.11 -p 27017:27017 -v ~/local-app-data/mongodb-8.3.11:/data/db -d mongodb/mongodb-community-server:8.3.11
+docker run --name mongodb-8.3.11 -p 27017:27017 -v ~/local-app-data/mongodb-8.3.11:/data/db -d mongodb/mongodb-community-server:8.3.11-ubi8-slim
 ```
 
 ## Verification Status (Current)

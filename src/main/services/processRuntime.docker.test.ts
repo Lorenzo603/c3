@@ -218,7 +218,7 @@ describe('docker process monitoring', () => {
       {
         ID: 'mg001',
         Names: 'mongodb-db',
-        Image: 'mongodb/mongodb-community-server:8.3.11-ubuntu2204',
+        Image: 'mongodb/mongodb-community-server:8.3.11-ubi8-slim',
         Ports: '0.0.0.0:27017->27017/tcp',
         Status: 'Up 6 minutes'
       }
@@ -453,7 +453,7 @@ describe('docker process monitoring', () => {
           stdout: JSON.stringify({
             ID: 'mg001',
             Names: 'mongodb-db',
-            Image: 'mongodb/mongodb-community-server:8.3.11-ubuntu2204',
+            Image: 'mongodb/mongodb-community-server:8.3.11-ubi8-slim',
             Ports: '0.0.0.0:27017->27017/tcp',
             Status: 'Up 9 minutes'
           }),
