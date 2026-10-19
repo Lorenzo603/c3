@@ -110,7 +110,7 @@ Artifacts are written to the release directory, including:
 
 # MySQL Docker command:
 ```
-docker run --name mysql -p 3306:3306 -v ~/local-app-data/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -d mysql:8 
+docker run --name mysql -p 3306:3306 -v ~/local-app-data/mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -d mysql:8.4
 ```
 
 # MongoDB 8.3.11 Docker command:
