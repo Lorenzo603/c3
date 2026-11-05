@@ -42,7 +42,7 @@ const DOCKER_PROCESS_CONFIGS: DockerProcessConfig[] = [
   },
   {
     id: DOCKER_MYSQL_PROCESS_ID,
-    name: 'MySQL (Docker)',
+    name: 'MySQL 8.4 (Docker)',
     logoPath: '/process-logos/mysql.svg',
     ports: [MYSQL_DOCKER_PORT],
     matchHints: ['mysql', 'mariadb']
