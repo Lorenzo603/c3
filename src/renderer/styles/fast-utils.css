@@ -61,6 +61,32 @@
   color: var(--text-secondary);
 }
 
+.fast-utils-trim-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.fast-utils-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.fast-utils-toggle-checkbox {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: var(--brand);
+}
+
+.fast-utils-toggle-text {
+  font-weight: 500;
+}
+
 .fast-utils-textarea {
   width: 100%;
   padding: 0.75rem;

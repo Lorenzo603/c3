@@ -25,6 +25,7 @@ export function FastUtilsPage() {
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [trimWhitespace, setTrimWhitespace] = useState(true);
 
   const activeTool = TOOLS.find((t) => t.id === activeToolId)!;
 
@@ -33,22 +34,27 @@ export function FastUtilsPage() {
     setResult('');
     setCopied(false);
 
-    if (!input.trim()) {
+    let processedInput = input;
+    if (trimWhitespace) {
+      processedInput = input.trim();
+    }
+
+    if (!processedInput) {
       return;
     }
 
     try {
       if (activeToolId === 'base64-encode') {
-        const encoded = btoa(unescape(encodeURIComponent(input)));
+        const encoded = btoa(unescape(encodeURIComponent(processedInput)));
         setResult(encoded);
       } else {
-        const decoded = decodeURIComponent(escape(atob(input.trim())));
+        const decoded = decodeURIComponent(escape(atob(processedInput)));
         setResult(decoded);
       }
     } catch {
       setError('Invalid input for the selected operation.');
     }
-  }, [input, activeToolId]);
+  }, [input, activeToolId, trimWhitespace]);
 
   const handleCopy = useCallback(async () => {
     if (!result) return;
@@ -99,6 +105,18 @@ export function FastUtilsPage() {
           <label htmlFor="fast-utils-input" className="fast-utils-label">
             {activeTool.description}
           </label>
+          <div className="fast-utils-trim-toggle">
+            <label htmlFor="trim-whitespace" className="fast-utils-toggle-label">
+              <input
+                id="trim-whitespace"
+                type="checkbox"
+                className="fast-utils-toggle-checkbox"
+                checked={trimWhitespace}
+                onChange={(e) => setTrimWhitespace(e.target.checked)}
+              />
+              <span className="fast-utils-toggle-text">Trim whitespace</span>
+            </label>
+          </div>
           <textarea
             id="fast-utils-input"
             className="fast-utils-textarea"
