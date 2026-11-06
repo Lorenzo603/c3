@@ -36,7 +36,7 @@ export function FastUtilsPage() {
 
     let processedInput = input;
     if (trimWhitespace) {
-      processedInput = input.trim();
+      processedInput = input.trim().replace(/\r/g, '');
     }
 
     if (!processedInput) {
