@@ -118,6 +118,12 @@ docker run --name mysql -p 3306:3306 -v ~/local-app-data/mysql:/var/lib/mysql -e
 docker run --name mongodb-8.3.11 -p 27017:27017 -v ~/local-app-data/mongodb-8.3.11:/data/db -d mongodb/mongodb-community-server:8.3.11-ubi8-slim
 ```
 
+# Qdrant Docker command:
+```
+docker run --name qdrant -p 6333:6333 -p 6334:6334 -v "~/local-app-data/qdrant_storage:/qdrant/storage:z" qdrant/qdrant
+```
+
+
 ## Verification Status (Current)
 
 - Dev startup path builds main/preload/renderer and launches Electron.
