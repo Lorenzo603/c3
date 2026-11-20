@@ -34,6 +34,11 @@ const SHORTCUTS: ShortcutDefinition[] = [
     id: 'open-vscode-one-cst',
     label: 'Open VS Code: one-cst',
     launchingLabel: 'Opening VS Code: one-cst...'
+  },
+  {
+    id: 'start-llamacpp-router',
+    label: 'Start Llama.cpp Router',
+    launchingLabel: 'Starting Llama.cpp Router...'
   }
 ];
 

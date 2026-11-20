@@ -112,6 +112,13 @@ function resolveShortcutExecutionPlan(shortcutId: ShortcutId): ShortcutExecution
         commandPreview: 'code ~/p/gitlab/lxitcrm/one-cst',
         successMessage: 'VS Code opened for ~/p/gitlab/lxitcrm/one-cst.'
       };
+    case 'start-llamacpp-router':
+      return {
+        command: '/bin/zsh',
+        args: ['-lc', '/Users/furrerl/ai/start-llamacpp-router.sh'],
+        commandPreview: '/Users/furrerl/ai/start-llamacpp-router.sh',
+        successMessage: 'Llama.cpp router started.'
+      };
     default:
       return undefined;
   }

@@ -10,7 +10,8 @@ export type ShortcutId =
   | 'open-bruno-crmapps'
   | 'open-vscode-lxitcrm'
   | 'open-vscode-crmsapp'
-  | 'open-vscode-one-cst';
+  | 'open-vscode-one-cst'
+  | 'start-llamacpp-router';
 
 export type ProcessStatus =
   | 'running'
